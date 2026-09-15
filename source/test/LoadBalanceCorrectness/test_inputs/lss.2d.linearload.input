@@ -1,0 +1,149 @@
+/*************************************************************************
+ *
+ * This file is part of the SAMRAI distribution.  For full copyright
+ * information, see COPYRIGHT and LICENSE.
+ *
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
+ * Description:   Load balance correctness test input file.
+ *
+ ************************************************************************/
+
+// Mesh configuration: Lump with 2 shells.
+
+// Refer to lss.2d.treelb.input for full description of all input parameters
+// specific to this problem.
+
+Main {
+   dim = 2
+
+   base_name = "lss.2d.linearload"
+
+   baseline_dirname = "test_inputs"
+
+   baseline_action = "COMPARE" // "GENERATE" or "COMPARE" or "NONE"
+
+   write_visit = FALSE
+
+   log_all_nodes = FALSE
+
+   domain_boxes = [(0,0),(99,99)]
+   xlo = 0.0, 0.0
+   xhi = 1.0, 1.0
+
+   enforce_nesting = TRUE, TRUE, TRUE
+
+   load_balance = TRUE, TRUE
+
+   autoscale_base_nprocs = 1
+
+   box_generator_type = "BergerRigoutsos"
+
+   load_balancer_type = "CascadePartitioner"
+
+   rank_tree_type = "CenteredRankTree"
+
+   mesh_generator_name = "SphericalShellGenerator"
+
+   SphericalShellGenerator {
+      radii = 0.60, 0.61
+      //radii = 0.0, 0.35,    0.60, 0.65,    0.95, 0.97
+
+      buffer_distance_0 = 0.02, 0.02
+      //buffer_distance_1 = 0.00, 0.00
+   }
+}
+
+
+TileClustering {
+  tile_size = 10, 10
+  allow_remote_tile_extent = TRUE
+  coalesce_boxes = TRUE
+  DEV_log_cluster_summary = FALSE
+  DEV_log_cluster = FALSE
+  DEV_debug_checks = TRUE
+}
+
+
+BergerRigoutsos {
+  sort_output_nodes = TRUE
+  efficiency_tolerance = 0.85
+  combine_efficiency = 0.85
+  DEV_log_node_history = FALSE
+  DEV_log_cluster_summary = FALSE
+  DEV_log_cluster = FALSE
+}
+
+
+CascadePartitioner {
+  flexible_load_tolerance = 0.05
+  use_vouchers = FALSE
+  //artificial_minimum_load = 1500,5000,18000
+  using_linear_load = TRUE, TRUE, TRUE
+  linear_load_slope=8e-5, 8e-5, 8e-5
+  linear_load_intercept=50., 50, 50.
+  DEV_limit_supply_to_surplus = FALSE
+  // Debugging options
+  DEV_report_load_balance = TRUE
+  DEV_check_map = TRUE
+  DEV_check_connectivity = TRUE
+  DEV_print_steps = TRUE
+  DEV_summarize_map = TRUE
+}
+
+
+TreeLoadBalancer {
+  DEV_report_load_balance = TRUE // Reported in main
+
+  // Debugging options
+  DEV_check_map = TRUE
+  DEV_check_connectivity = TRUE
+  DEV_print_steps = FALSE
+  DEV_print_swap_steps = FALSE
+  DEV_print_break_steps = FALSE
+  DEV_print_edge_steps = FALSE
+  DEV_summarize_map = TRUE
+}
+
+TimerManager {
+//   print_exclusive      = TRUE
+   print_summed           = TRUE
+   print_max              = TRUE
+   print_threshold        = 0.
+   timer_list             = "hier::*::*", "mesh::*::*", "apps::*::*"
+}
+
+
+PatchHierarchy {
+
+   /*
+     Specify number of levels (1, 2 or 3 for this test).
+   */
+   max_levels = 3
+
+   largest_patch_size {
+      level_0 = -1,-1
+   }
+   smallest_patch_size {
+      level_0 = 12, 12
+      level_1 = 6, 6
+      level_2 = 15, 15
+   }
+   ratio_to_coarser {
+      level_1            = 3, 3
+      level_2            = 3, 3
+      level_3            = 3, 3
+   }
+   minimum_cell_request {
+      level_0 = 1500
+      level_1 = 3000
+      level_2 = 9000
+   }
+
+   allow_patches_smaller_than_ghostwidth = TRUE
+   allow_patches_smaller_than_minimum_size_to_prevent_overlaps = TRUE
+   proper_nesting_buffer = 1, 1
+}
+
+BoxTransitSet {
+   DEV_print_break_steps = FALSE
+}
