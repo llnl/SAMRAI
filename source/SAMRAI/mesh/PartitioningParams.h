@@ -14,6 +14,7 @@
 #include "SAMRAI/SAMRAI_config.h"
 
 #include "SAMRAI/hier/BaseGridGeometry.h"
+#include "SAMRAI/hier/Box.h"
 
 #include <map>
 
@@ -28,6 +29,77 @@ namespace mesh {
 class PartitioningParams
 {
 public:
+   /*!
+    * @brief Resolved load model for one partitioning operation.
+    *
+    * CascadePartitioner resolves hierarchy-level configuration and ghost
+    * widths before constructing this value.  The resulting model is immutable
+    * and valid for every box accepted by the corresponding partitioning
+    * parameters.
+    */
+   struct LoadModel
+   {
+   public:
+      enum Type {
+         CELL_COUNT,
+         LINEAR
+      };
+
+      static LoadModel
+      cellCount(
+         const tbox::Dimension& dim,
+         double artificial_minimum);
+
+      static LoadModel
+      linear(
+         double slope,
+         double intercept,
+         const hier::IntVector& ghost_width,
+         const hier::IntVector& minimum_box_size);
+
+      double
+      computeBoxLoad(
+         const hier::Box& box) const;
+
+      double
+      computeSplitWeight(
+         const hier::Box& box) const;
+
+      bool isLinear() const {
+         return d_type == LINEAR;
+      }
+
+      double getSlope() const {
+         return d_slope;
+      }
+
+      double getIntercept() const {
+         return d_intercept;
+      }
+
+      double getArtificialMinimum() const {
+         return d_artificial_minimum;
+      }
+
+      const hier::IntVector& getGhostWidth() const {
+         return d_ghost_width;
+      }
+
+   private:
+      LoadModel(
+         Type type,
+         double slope,
+         double intercept,
+         double artificial_minimum,
+         const hier::IntVector& ghost_width);
+
+      Type d_type;
+      double d_slope;
+      double d_intercept;
+      double d_artificial_minimum;
+      hier::IntVector d_ghost_width;
+   };
+
    PartitioningParams(
       const hier::BaseGridGeometry& grid_geometry,
       const hier::IntVector& ratio_to_level_zero,
@@ -37,6 +109,17 @@ public:
       const hier::IntVector& cut_factor,
       size_t minimum_cells,
       double artificial_minimum_load,
+      double flexible_load_tol);
+
+   PartitioningParams(
+      const hier::BaseGridGeometry& grid_geometry,
+      const hier::IntVector& ratio_to_level_zero,
+      const hier::IntVector& min_size,
+      const hier::IntVector& max_size,
+      const hier::IntVector& bad_interval,
+      const hier::IntVector& cut_factor,
+      size_t minimum_cells,
+      const LoadModel& load_model,
       double flexible_load_tol);
 
    PartitioningParams(
@@ -71,7 +154,7 @@ public:
    } 
 
    double getArtificialMinimumLoad() const {
-      return d_artificial_minimum_load;
+      return d_load_model.getArtificialMinimum();
    }
 
    const tbox::Dimension& getDim() const {
@@ -85,6 +168,38 @@ public:
    const double& getLoadComparisonTol() const {
       return d_load_comparison_tol;
    }
+
+   bool usingLinearLoad() const {
+      return d_load_model.isLinear();
+   }
+
+   /*!
+    * @brief Compute the configured load for a box.
+    *
+    * Linear loading uses the volume after growing by the model's ghost width.
+    * Cell-count loading applies the configured artificial minimum.
+    */
+   double
+   computeBoxLoad(
+      const hier::Box& box) const;
+
+   /*!
+    * @brief Compute a box's relative weight when apportioning split load.
+    *
+    * Unlike computeBoxLoad(), this does not apply the artificial minimum in
+    * cell-count mode because split loads are apportioned by cell count.
+    */
+   double
+   computeSplitWeight(
+      const hier::Box& box) const;
+
+   const LoadModel& getLoadModel() const {
+      return d_load_model;
+   }
+
+   void
+   setLoadModel(
+      const LoadModel& load_model);
 
    const bool& usingVouchers() const {
       return d_using_vouchers;
@@ -130,12 +245,8 @@ private:
     */
    size_t d_minimum_cells;
 
-   /*
-    * @brief An optional artificial load value. If used, new boxes smaller
-    * than this value are treated as if their load is this value during
-    * load balancing operations.
-    */
-   double d_artificial_minimum_load;
+   /*! @brief Validated load model for this partitioning operation. */
+   LoadModel d_load_model;
 
    /*!
     * @brief Fraction of ideal load a process can accept over and
