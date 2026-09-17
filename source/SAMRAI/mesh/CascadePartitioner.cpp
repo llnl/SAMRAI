@@ -73,6 +73,17 @@ computeGhostGrownVolume(
    return volume;
 }
 
+template<class T>
+T
+valueForLevel(
+   const std::vector<T>& values,
+   std::size_t level,
+   T default_value)
+{
+   return values.empty() ?
+      default_value : values[level < values.size() ? level : values.size() - 1];
+}
+
 void
 printLoadBalanceDiagnostics(
    const tbox::SAMRAI_MPI& mpi,
@@ -83,15 +94,13 @@ printLoadBalanceDiagnostics(
    const double local_load,
    const hier::IntVector* ghost_width)
 {
-   if (mpi.getRank() == 0) {
-      if (ghost_width &&
-          s_printed_ghost_width_levels.insert(level_number).second) {
-         std::cout << "level=" << level_number
-                   << " ghost_width=" << *ghost_width << std::endl;
-      }
+   if (mpi.getRank() == 0 && ghost_width &&
+       s_printed_ghost_width_levels.insert(level_number).second) {
+      std::cout << "level=" << level_number
+                << " ghost_width=" << *ghost_width << std::endl;
    }
 
-   std::cout << "level=" << level_number
+   tbox::perr << "level=" << level_number
              << " rank=" << mpi.getRank()
              << " Patches=" << local_patch_count
              << " zones=" << local_zones
@@ -122,7 +131,7 @@ CascadePartitioner::CascadePartitioner(
    d_linear_load_slope(1, 1.0),
    d_linear_load_intercept(1, 0.0),
    d_linear_load_data_ids(),
-   d_max_linear_load_iterations(3),
+   d_max_linear_load_iterations(1),
    d_max_spread_procs(500),
    d_limit_supply_to_surplus(true),
    d_reset_obligations(true),
@@ -290,53 +299,15 @@ CascadePartitioner::loadBalanceBoxLevel(
    if (hierarchy) {
       minimum_cells = hierarchy->getMinimumCellRequest(level_number);
       const unsigned int ln = static_cast<unsigned int>(level_number);
-      if (!d_artificial_minimum.empty()) {
-         if (ln < d_artificial_minimum.size()) {
-            artificial_minimum = d_artificial_minimum[ln];
-         } else {
-            artificial_minimum = d_artificial_minimum.back();
-         }
-      }
+      artificial_minimum = valueForLevel(
+         d_artificial_minimum, ln, artificial_minimum);
       TBOX_ASSERT(artificial_minimum >= 0.0);
-      if (!d_using_linear_load.empty()) {
-         if (ln < d_using_linear_load.size()) {
-            using_linear_load = d_using_linear_load[ln];
-         } else {
-            using_linear_load = d_using_linear_load.back();
-         }
-      }
-
-      if (!d_linear_load_slope.empty()) {
-         if (ln < d_linear_load_slope.size()) {
-            linear_load_slope = d_linear_load_slope[ln];
-         } else {
-            linear_load_slope = d_linear_load_slope.back();
-         }
-      }
-
-      if (!d_linear_load_intercept.empty()) {
-         if (ln < d_linear_load_intercept.size()) {
-            linear_load_intercept = d_linear_load_intercept[ln];
-         } else {
-            linear_load_intercept = d_linear_load_intercept.back();
-         }
-      }
-   }
-
-   if (using_linear_load) {
-      if (!std::isfinite(linear_load_slope) ||
-          !std::isfinite(linear_load_intercept)) {
-         TBOX_ERROR(
-            d_object_name << "::loadBalanceBoxLevel error:\n"
-            << "Linear-load coefficients must be finite.\n");
-      }
-
-      if (linear_load_slope < 0.0) {
-         TBOX_ERROR(
-            d_object_name << "::loadBalanceBoxLevel error:\n"
-            << "The linear-load model must be nondecreasing and produce "
-            << "positive loads.\n");
-      }
+      using_linear_load = valueForLevel(
+         d_using_linear_load, ln, using_linear_load);
+      linear_load_slope = valueForLevel(
+         d_linear_load_slope, ln, linear_load_slope);
+      linear_load_intercept = valueForLevel(
+         d_linear_load_intercept, ln, linear_load_intercept);
    }
 
    if (using_linear_load && d_use_vouchers) {
@@ -434,18 +405,6 @@ CascadePartitioner::loadBalanceBoxLevel(
    d_workload_level.reset();
    t_load_balance_box_level->start();
 
-   d_pparams = std::make_shared<PartitioningParams>(
-         *balance_box_level.getGridGeometry(),
-         balance_box_level.getRefinementRatio(),
-         min_size, max_size, bad_interval, effective_cut_factor,
-         minimum_cells,
-         using_linear_load ? 0.0 : artificial_minimum,
-         d_flexible_load_tol);
-
-   d_pparams->setUsingLinearLoad(using_linear_load);
-   d_pparams->setLoadSlope(linear_load_slope);
-   d_pparams->setLoadIntercept(linear_load_intercept);
-
    /*
     * Ghost width is patch data metadata. Applications register variables
     * (and their ghost widths) with SAMRAI's PatchDescriptor.
@@ -482,31 +441,21 @@ CascadePartitioner::loadBalanceBoxLevel(
          }
       }
    }
-   d_pparams->setGhostWidth(ghost_width);
+   const PartitioningParams::LoadModel load_model = using_linear_load ?
+      PartitioningParams::LoadModel::linear(
+         linear_load_slope,
+         linear_load_intercept,
+         ghost_width,
+         min_size) :
+      PartitioningParams::LoadModel::cellCount(d_dim, artificial_minimum);
 
-   if (using_linear_load) {
-      double minimum_modeled_load =
-         std::numeric_limits<double>::infinity();
-      for (hier::BlockId::block_t b = 0;
-           b < min_size.getNumBlocks(); ++b) {
-         double minimum_grown_volume = 1.0;
-         for (int d = 0; d < d_dim.getValue(); ++d) {
-            minimum_grown_volume *=
-               static_cast<double>(min_size(b, d)) +
-               2.0 * static_cast<double>(ghost_width[d]);
-         }
-         minimum_modeled_load = tbox::MathUtilities<double>::Min(
-            minimum_modeled_load,
-            d_pparams->computeLinearLoad(minimum_grown_volume));
-      }
-      if (!std::isfinite(minimum_modeled_load) ||
-          minimum_modeled_load <= 0.0) {
-         TBOX_ERROR(
-            d_object_name << "::loadBalanceBoxLevel error:\n"
-            << "The linear-load model must produce a positive, finite "
-            << "load for every minimum-size ghost-grown box.\n");
-      }
-   }
+   d_pparams = std::make_shared<PartitioningParams>(
+         *balance_box_level.getGridGeometry(),
+         balance_box_level.getRefinementRatio(),
+         min_size, max_size, bad_interval, effective_cut_factor,
+         minimum_cells,
+         load_model,
+         d_flexible_load_tol);
 
    hier::IntVector max_intvector(d_dim, tbox::MathUtilities<int>::getMax());
    if (using_linear_load && max_size != max_intvector) {
@@ -548,7 +497,7 @@ CascadePartitioner::loadBalanceBoxLevel(
 
    if (print_load_balance_diagnostics) {
       if (print_unique_load_model_diagnostics) {
-         std::cout << "level=" << level_number
+         tbox::perr << "level=" << level_number
                    << " global_work_sum=" << d_global_work_sum
                    << " avg=" << d_global_work_avg
                    << " ranks=" << rank_group.size() << std::endl;
@@ -721,13 +670,15 @@ CascadePartitioner::loadBalanceBoxLevel(
        * Run partitioning algorithm again, this time taking into account
        * the computed workloads.  This call always uses vouchers.
        */
-      const bool restore_linear_load = d_pparams->usingLinearLoad();
-      d_pparams->setUsingLinearLoad(false);
+      const PartitioningParams::LoadModel restore_load_model =
+         d_pparams->getLoadModel();
+      d_pparams->setLoadModel(
+         PartitioningParams::LoadModel::cellCount(d_dim, 0.0));
       partitionByCascade(
          balance_box_level,
          balance_to_reference,
          true);
-      d_pparams->setUsingLinearLoad(restore_linear_load);
+      d_pparams->setLoadModel(restore_load_model);
 
       d_workload_level.reset();
       t_load_balance_box_level->stop();
@@ -822,8 +773,9 @@ CascadePartitioner::loadBalanceBoxLevel(
 
 /*
  *************************************************************************
- * Run cascade partitioning until the modeled load agrees with the box
- * geometry produced by the preceding pass.
+ * Run one or more split-producing cascade passes.  Return immediately when
+ * the global modeled load converges; otherwise, finish with a correction pass
+ * that redistributes the final boxes without changing their geometry.
  *************************************************************************
  */
 void
@@ -833,7 +785,7 @@ CascadePartitioner::partitionByCascadeIteratively(
    bool use_vouchers,
    const tbox::RankGroup& rank_group) const
 {
-   if (!d_pparams->usingLinearLoad()) {
+   if (d_workload_level || !d_pparams->usingLinearLoad()) {
       partitionByCascade(
          balance_box_level,
          balance_to_reference,
@@ -842,6 +794,8 @@ CascadePartitioner::partitionByCascadeIteratively(
       return;
    }
 
+   const bool convergence_requested = d_max_linear_load_iterations > 1;
+   bool load_converged = false;
    for (int linear_load_iteration = 1;
         linear_load_iteration <= d_max_linear_load_iterations;
         ++linear_load_iteration) {
@@ -877,7 +831,7 @@ CascadePartitioner::partitionByCascadeIteratively(
             d_pparams->getLoadComparisonTol(),
             64.0 * std::numeric_limits<double>::epsilon() *
             convergence_scale);
-      const bool load_converged =
+      load_converged =
          std::fabs(d_global_work_sum - partition_work_sum) <=
          convergence_tolerance;
 
@@ -895,18 +849,20 @@ CascadePartitioner::partitionByCascadeIteratively(
       }
    }
 
-   if (d_mpi.getRank() == 0) {
+   if (convergence_requested && !load_converged && d_mpi.getRank() == 0) {
       TBOX_WARNING(
          d_object_name << "::partitionByCascadeIteratively warning:\n"
-         << "Linear-load iteration did not converge after "
+         << "Additional linear-load iterations did not converge after "
          << d_max_linear_load_iterations << " split-producing passes. "
-         << "Performing a final pass with box breaking disabled.\n");
+         << "Performing the final correction pass.\n");
    }
 
    /*
-    * The most recent reduction describes the current box geometry exactly.
-    * Disabling box breaking prevents this final redistribution from creating
-    * additional halo regions or per-box intercept costs.
+    * The most recent reduction describes the current box geometry exactly,
+    * but equality of global load sums does not imply that every split box
+    * retained its exact modeled load.  Reinsert the current boxes with their
+    * recomputed loads.  Disabling box breaking prevents this redistribution
+    * from making those loads stale again by changing box geometry.
     */
    partitionByCascade(
       balance_box_level,
@@ -927,13 +883,15 @@ CascadePartitioner::computeIdealBoxWidth() const
 {
    TBOX_ASSERT(d_pparams);
 
-   if (!d_pparams->usingLinearLoad()) {
+   if (d_workload_level || !d_pparams->usingLinearLoad()) {
       return pow(d_global_work_avg, 1.0 / d_dim.getValue());
    }
 
    const double minimum_width =
       static_cast<double>(d_pparams->getMinBoxSize().min());
-   const double slope = d_pparams->getLoadSlope();
+   const PartitioningParams::LoadModel& load_model =
+      d_pparams->getLoadModel();
+   const double slope = load_model.getSlope();
 
    /*
     * A zero slope makes load independent of geometry, so there is no
@@ -945,12 +903,12 @@ CascadePartitioner::computeIdealBoxWidth() const
    }
 
    const double target_grown_volume =
-      (d_global_work_avg - d_pparams->getLoadIntercept()) / slope;
+      (d_global_work_avg - load_model.getIntercept()) / slope;
    if (!std::isfinite(target_grown_volume) || target_grown_volume <= 0.0) {
       return minimum_width;
    }
 
-   const hier::IntVector& ghost_width = d_pparams->getGhostWidth();
+   const hier::IntVector& ghost_width = load_model.getGhostWidth();
    const int dimension = d_dim.getValue();
    bool uniform_ghost_width = true;
    for (int d = 1; d < dimension; ++d) {
@@ -1043,8 +1001,8 @@ CascadePartitioner::partitionByCascade(
          getWorkloadDataId(d_workload_level->getLevelNumber()));
    } else if (d_pparams->usingLinearLoad()) {
       TBOX_ASSERT(box_local_load);
-      box_local_load->insertAllWithScaledLoad(
-         balance_box_level.getBoxes(), d_pparams->getGhostWidth());
+      box_local_load->insertAllWithModeledLoad(
+         balance_box_level.getBoxes());
    } else if (d_pparams->getArtificialMinimumLoad() >
               d_pparams->getMinBoxSizeProduct()) {
       local_load->insertAllWithArtificialMinimum(
@@ -1295,40 +1253,19 @@ CascadePartitioner::computeLocalLoad(
 {
    double load = 0.0;
    const hier::BoxContainer& boxes = box_level.getBoxes();
-   const bool using_linear_load =
-      apply_load_model && d_pparams && d_pparams->usingLinearLoad();
-   const bool apply_artificial_minimum =
-      apply_load_model && d_pparams &&
-      !using_linear_load &&
-      d_pparams->getArtificialMinimumLoad() >
-      d_pparams->getMinBoxSizeProduct();
+
+   if (!apply_load_model || !d_pparams) {
+      for (hier::BoxContainer::const_iterator ni = boxes.begin();
+           ni != boxes.end(); ++ni) {
+         load += static_cast<double>(ni->size());
+      }
+      return static_cast<LoadType>(load);
+   }
 
    for (hier::BoxContainer::const_iterator ni = boxes.begin();
         ni != boxes.end();
         ++ni) {
-      double box_size = static_cast<double>(ni->size());
-      if (using_linear_load) {
-         hier::Box grown_box(*ni);
-         grown_box.grow(d_pparams->getGhostWidth());
-         box_size = static_cast<double>(grown_box.size());
-      }
-      double box_load = box_size;
-
-      if (using_linear_load) {
-         box_load = d_pparams->computeLinearLoad(box_size);
-         if (!std::isfinite(box_load) || box_load <= 0.0) {
-            TBOX_ERROR(
-               d_object_name << "::computeLocalLoad error:\n"
-               << "The linear-load model produced a non-positive or "
-               << "non-finite load for box " << *ni << ".\n");
-         }
-      }
-
-      if (apply_artificial_minimum) {
-         box_load = tbox::MathUtilities<double>::Max(
-            box_load,
-            d_pparams->getArtificialMinimumLoad());
-      }
+      const double box_load = d_pparams->computeBoxLoad(*ni);
 
       load += box_load;
    }
@@ -1365,7 +1302,7 @@ CascadePartitioner::computeLocalZones(
         ni != boxes.end();
       ++ni) {
       hier::Box tmp(*ni);
-      tmp.grow(d_pparams->getGhostWidth());
+      tmp.grow(d_pparams->getLoadModel().getGhostWidth());
       double box_load = static_cast<double>(tmp.size());
 
       load += box_load;

@@ -503,6 +503,11 @@ private:
 
    /*!
     * @brief Maximum number of split-producing linear-load passes.
+    *
+    * The default value of one performs one split-producing pass followed by
+    * a no-breaking correction pass.  Values greater than one request
+    * additional convergence passes.  The correction pass is not included in
+    * this limit.
     */
    int d_max_linear_load_iterations;
 

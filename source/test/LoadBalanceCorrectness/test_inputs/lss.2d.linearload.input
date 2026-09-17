@@ -86,7 +86,7 @@ CascadePartitioner {
   DEV_report_load_balance = TRUE
   DEV_check_map = TRUE
   DEV_check_connectivity = TRUE
-  DEV_print_steps = TRUE
+  DEV_print_steps = FALSE
   DEV_summarize_map = TRUE
 }
 
