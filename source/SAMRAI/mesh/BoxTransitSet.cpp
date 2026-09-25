@@ -18,6 +18,8 @@
 #include "SAMRAI/tbox/AsyncCommPeer.h"
 #include "SAMRAI/tbox/AsyncCommStage.h"
 
+#include <cmath>
+
 #if !defined(__BGL_FAMILY__) && defined(__xlC__)
 /*
  * Suppress XLC warnings
@@ -35,6 +37,44 @@ const int BoxTransitSet::BoxTransitSet_FIRSTDATALEN;
 
 const std::string BoxTransitSet::s_default_timer_prefix("mesh::BoxTransitSet");
 std::map<std::string, BoxTransitSet::TimerStruct> BoxTransitSet::s_static_timers;
+
+namespace {
+
+double
+computeBoxWeights(
+   std::vector<double>& weights,
+   const hier::BoxContainer& boxes,
+   const PartitioningParams& pparams)
+{
+   weights.clear();
+   weights.reserve(boxes.size());
+
+   if (boxes.empty()) {
+      return 0.0;
+   }
+
+   double total_weight = 0.0;
+   for (hier::BoxContainer::const_iterator bi = boxes.begin();
+        bi != boxes.end(); ++bi) {
+      const double weight = pparams.computeSplitWeight(*bi);
+      if (!std::isfinite(weight) || weight <= 0.0) {
+         TBOX_ERROR(
+            "BoxTransitSet cannot apportion a non-positive or non-finite "
+            << "box load.\n");
+      }
+      weights.push_back(weight);
+      total_weight += weight;
+   }
+
+   if (!std::isfinite(total_weight) || total_weight <= 0.0) {
+      TBOX_ERROR(
+         "BoxTransitSet cannot apportion a non-positive or non-finite "
+         << "total box load.\n");
+   }
+   return total_weight;
+}
+
+}
 
 tbox::StartupShutdownManager::Handler
 BoxTransitSet::s_initialize_finalize_handler(
@@ -156,6 +196,33 @@ void BoxTransitSet::insertAllWithArtificialMinimum(
    }
 }
 
+void
+BoxTransitSet::insertAllWithModeledLoad(
+   const hier::BoxContainer& other)
+{
+   size_t old_size = d_set.size();
+   if (!d_pparams || !d_pparams->usingLinearLoad()) {
+      TBOX_ERROR(
+         "BoxTransitSet::insertAllWithModeledLoad requires linear loading.\n");
+   }
+
+   for (hier::BoxContainer::const_iterator bi = other.begin();
+        bi != other.end(); ++bi) {
+      const double box_load = d_pparams->computeBoxLoad(*bi);
+
+      BoxInTransit new_box(*bi);
+      new_box.setLoad(box_load);
+      d_set.insert(new_box);
+
+      d_sumload += new_box.getLoad();
+      d_sumsize += new_box.getSize();
+   }
+   if (d_set.size() != old_size + other.size()) {
+      TBOX_ERROR(
+         "BoxTransitSet's insertAllWithModeledLoad currently can't weed "
+         << "out duplicates.");
+   }
+}
 
 /*
  *************************************************************************
@@ -744,7 +811,7 @@ BoxTransitSet::adjustLoad(
        * Skip breaking if adding/subtracting the min load overshoots the range and worsens distance to range.
        */
       if (tbox::MathUtilities<double>::Abs(main_bin.getSumLoad() - 0.5 * (high_load + low_load)) <=
-          0.5 * d_pparams->getMinBoxSizeProduct()) {
+          0.5 * d_pparams->getMinBoxLoad()) {
          break;
       }
 
@@ -982,13 +1049,22 @@ BoxTransitSet::adjustLoadByBreaking(
        * in main_bin and its leftover parts back into hold_bin.
        */
       hold_bin.erase(breakbox);
-      size_t breakoff_size = breakoff.getTotalSizeOfBoxes();
+      const bool using_workload =
+         work_data_id >= 0 && d_pparams->usingVouchers();
+      std::vector<double> breakoff_item_weights;
+      const double breakoff_weight = using_workload ? 0.0 :
+         computeBoxWeights(
+            breakoff_item_weights,
+            breakoff,
+            *d_pparams);
+      size_t breakoff_item_index = 0;
       for (hier::BoxContainer::const_iterator bi = breakoff.begin();
            bi != breakoff.end();
            ++bi) {
          /*
           * The breakoff load (breakoff_amt) is apportioned proportionally
-          * according to box size to the boxes in the breakoff container.
+          * according to modeled load in the linear case and box size
+          * otherwise.
           * No corner weight information is stored in the resulting
           * BoxInTransits.
           *
@@ -1001,7 +1077,7 @@ BoxTransitSet::adjustLoadByBreaking(
             breakbox.getOwnerRank(),
             hier::LocalId::getInvalidId());
 
-         if (work_data_id >= 0 && d_pparams->usingVouchers()) {
+         if (using_workload) {
             const hier::BoxId& orig_box_id =
                give_box_in_transit.getOrigBox().getBoxId();
             const std::shared_ptr<hier::Patch>& patch =
@@ -1016,8 +1092,9 @@ BoxTransitSet::adjustLoadByBreaking(
                   give_box_in_transit.getBox()));
             give_box_in_transit.setCornerWeights(corner_weights);
          } else {
-            double load_frac = static_cast<double>(bi->size()) /
-                               static_cast<double>(breakoff_size);
+            const double item_weight =
+               breakoff_item_weights[breakoff_item_index++];
+            double load_frac = item_weight / breakoff_weight;
             give_box_in_transit.setLoad(load_frac * breakoff_amt);
             give_box_in_transit.setCornerWeights(std::vector<double>(0));
          }
@@ -1026,22 +1103,28 @@ BoxTransitSet::adjustLoadByBreaking(
       }
       LoadType leftover_amt = breakbox.getLoad() - 
                               static_cast<LoadType>(breakoff_amt);
-      size_t leftover_size = leftover.getTotalSizeOfBoxes();
+      std::vector<double> leftover_item_weights;
+      const double leftover_weight = using_workload ? 0.0 :
+         computeBoxWeights(
+            leftover_item_weights,
+            leftover,
+            *d_pparams);
+      size_t leftover_item_index = 0;
       for (hier::BoxContainer::const_iterator bi = leftover.begin();
            bi != leftover.end();
            ++bi) {
          /*
-          * The leftover load (origial load minus breakoff_amt) is
-          * aportioned proportionally according to box size to the boxes
-          * in the leftover container.  No corner weight information is
-          * stored in the resulting BoxInTransits.
+          * The leftover load (original load minus breakoff_amt) is
+          * apportioned proportionally according to modeled load in the
+          * linear case and box size otherwise.  No corner weight information
+          * is stored in the resulting BoxInTransits.
           */
          BoxInTransit keep_box_in_transit(
             breakbox,
             *bi,
             breakbox.getOwnerRank(),
             hier::LocalId::getInvalidId());
-         if (work_data_id >= 0 && d_pparams->usingVouchers()) {
+         if (using_workload) {
             const hier::BoxId& orig_box_id =
                keep_box_in_transit.getOrigBox().getBoxId();
             const std::shared_ptr<hier::Patch>& patch =
@@ -1056,8 +1139,9 @@ BoxTransitSet::adjustLoadByBreaking(
                   keep_box_in_transit.getBox()));
             keep_box_in_transit.setCornerWeights(corner_weights);
          } else {
-            double load_frac = static_cast<double>(bi->size()) /
-                               static_cast<double>(leftover_size);
+            const double item_weight =
+               leftover_item_weights[leftover_item_index++];
+            double load_frac = item_weight / leftover_weight;
 
             keep_box_in_transit.setLoad(load_frac * leftover_amt);
             keep_box_in_transit.setCornerWeights(std::vector<double>(0));
