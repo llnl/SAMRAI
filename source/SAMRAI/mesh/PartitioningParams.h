@@ -62,6 +62,10 @@ public:
          const hier::Box& box) const;
 
       double
+      computeMinimumBoxLoad(
+         const hier::IntVector& minimum_box_size) const;
+
+      double
       computeSplitWeight(
          const hier::Box& box) const;
 
@@ -92,6 +96,10 @@ public:
          double intercept,
          double artificial_minimum,
          const hier::IntVector& ghost_width);
+
+      double
+      computeLoad(
+         double modeled_cell_count) const;
 
       Type d_type;
       double d_slope;
@@ -127,6 +135,10 @@ public:
 
    double getMinBoxSizeProduct() const {
       return static_cast<double>(d_min_size.getProduct());
+   }
+
+   double getMinBoxLoad() const {
+      return d_load_model.computeMinimumBoxLoad(d_min_size);
    }
 
    const hier::IntVector& getMinBoxSize() const {

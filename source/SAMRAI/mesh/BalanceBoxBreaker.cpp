@@ -982,7 +982,7 @@ BalanceBoxBreaker::burstBox(
    const hier::Box& bursty,
    const hier::Box& solid)
 {
-   NULL_USE(burstBoxImpl(&boxes, bursty, solid, 0));
+   (void)burstBoxImpl(&boxes, bursty, solid, 0);
 }
 
 /*

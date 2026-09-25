@@ -103,16 +103,53 @@ double
 PartitioningParams::LoadModel::computeBoxLoad(
    const hier::Box& box) const
 {
-   double load;
+   double modeled_cell_count = static_cast<double>(box.size());
    if (d_type == LINEAR) {
       hier::Box grown_box(box);
       grown_box.grow(d_ghost_width);
-      load = d_slope * static_cast<double>(grown_box.size()) + d_intercept;
-   } else {
-      load = tbox::MathUtilities<double>::Max(
-         static_cast<double>(box.size()),
-         d_artificial_minimum);
+      modeled_cell_count = static_cast<double>(grown_box.size());
    }
+   return computeLoad(modeled_cell_count);
+}
+
+double
+PartitioningParams::LoadModel::computeMinimumBoxLoad(
+   const hier::IntVector& minimum_box_size) const
+{
+   if (minimum_box_size.getDim() != d_ghost_width.getDim()) {
+      TBOX_ERROR(
+         "PartitioningParams::LoadModel minimum box size has the wrong "
+         << "dimension.\n");
+   }
+
+   double minimum_load = 0.0;
+   for (hier::BlockId::block_t b = 0;
+        b < minimum_box_size.getNumBlocks(); ++b) {
+      double modeled_cell_count = 1.0;
+      for (int d = 0; d < minimum_box_size.getDim().getValue(); ++d) {
+         modeled_cell_count *=
+            static_cast<double>(minimum_box_size(b, d)) +
+            (d_type == LINEAR ?
+               2.0 * static_cast<double>(d_ghost_width[d]) : 0.0);
+      }
+      const double block_load = computeLoad(modeled_cell_count);
+      if (b == 0 || block_load < minimum_load) {
+         minimum_load = block_load;
+      }
+   }
+
+   return minimum_load;
+}
+
+double
+PartitioningParams::LoadModel::computeLoad(
+   double modeled_cell_count) const
+{
+   const double load = d_type == LINEAR ?
+      d_slope * modeled_cell_count + d_intercept :
+      tbox::MathUtilities<double>::Max(
+         modeled_cell_count,
+         d_artificial_minimum);
 
    if (!std::isfinite(load) || load <= 0.0) {
       TBOX_ERROR(

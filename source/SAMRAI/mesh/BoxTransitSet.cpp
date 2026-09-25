@@ -811,7 +811,7 @@ BoxTransitSet::adjustLoad(
        * Skip breaking if adding/subtracting the min load overshoots the range and worsens distance to range.
        */
       if (tbox::MathUtilities<double>::Abs(main_bin.getSumLoad() - 0.5 * (high_load + low_load)) <=
-          0.5 * d_pparams->getMinBoxSizeProduct()) {
+          0.5 * d_pparams->getMinBoxLoad()) {
          break;
       }
 
