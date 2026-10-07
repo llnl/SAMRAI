@@ -1,0 +1,25 @@
+###############################################################################
+# Copyright (c) 2022-26, Lawrence Livermore National Security, LLC and RADIUSS
+# project contributors. See the COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (MIT)
+###############################################################################
+
+# Project settings inherited by every build-and-test job.
+.custom_job:
+  artifacts:
+    when: always
+    paths:
+      - ctest_report_*.xml
+
+before_script:
+  - date
+  - echo $CI_COMMIT_BRANCH
+  - echo $SAMRAI_ALL_TARGETS
+  - echo $SAMRAI_CI_DANE
+  - echo $SAMRAI_CI_QUARTZ
+  - echo $SAMRAI_CI_TIOGA
+  - echo $SAMRAI_ALLOC_NAME
+
+after_script:
+  - date
