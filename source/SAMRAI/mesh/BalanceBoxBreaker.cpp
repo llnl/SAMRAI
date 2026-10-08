@@ -18,6 +18,8 @@
 #include "SAMRAI/tbox/Utilities.h"
 #include "SAMRAI/tbox/TimerManager.h"
 
+#include <cmath>
+
 #if !defined(__BGL_FAMILY__) && defined(__xlC__)
 /*
  * Suppress XLC warnings
@@ -33,6 +35,91 @@ namespace mesh {
 #define ROUND_TO_HI(a, b) ((a) - ((((a) % (b)) - (b)) % (b)))
 // Round a to the nearest lower integer divisible by b.  This should work even for a < 0.
 #define ROUND_TO_LO(a, b) ((a) - ((((a) % (b)) + (b)) % (b)))
+
+namespace {
+
+/*
+ *************************************************************************
+ * Decompose bursty around solid.  Optionally save the resulting boxes and
+ * optionally compute their combined split weight.
+ *************************************************************************
+ */
+double
+burstBoxImpl(
+   hier::BoxContainer* boxes,
+   const hier::Box& bursty,
+   const hier::Box& solid,
+   const PartitioningParams* pparams)
+{
+   /*
+    * This method lacks logic to handle the case of solid not being
+    * completely inside bursty.  That feature is not currently needed.
+    */
+   TBOX_ASSERT(bursty.contains(solid));
+
+   const hier::IntVector solid_size = solid.numberCells();
+
+   if (boxes) {
+      boxes->clear();
+   }
+   double total_weight = 0.0;
+   hier::Box cutme = bursty;
+   while (!cutme.isSpatiallyEqual(solid)) {
+
+      int cut_dir = 999999;
+      bool cut_above_solid = false; // Whether to slice off the piece above solid (vs below).
+      /*
+       * Find direction and place to cut.  To minimize slivers, cut
+       * from cutme the thickest slab (in direction normal to cut)
+       * possible.
+       */
+      int slab_thickness = 0;
+      for (tbox::Dimension::dir_t d = 0;
+           d < solid_size.getDim().getValue(); ++d) {
+         if (cutme.numberCells(d) > solid_size(d)) {
+            const int thickness_from_upper_cut = cutme.upper() (d)
+               - solid.upper() (d);
+            if (thickness_from_upper_cut > slab_thickness) {
+               slab_thickness = thickness_from_upper_cut;
+               cut_dir = d;
+               cut_above_solid = true;
+            }
+            const int thickness_from_lower_cut = solid.lower() (d)
+               - cutme.lower() (d);
+            if (thickness_from_lower_cut > slab_thickness) {
+               slab_thickness = thickness_from_lower_cut;
+               cut_dir = d;
+               cut_above_solid = false;
+            }
+         }
+      }
+      TBOX_ASSERT(cut_dir >= 0 && cut_dir < solid_size.getDim().getValue());
+
+      hier::Box removeme = cutme;
+      if (cut_above_solid) {
+         cutme.setUpper(static_cast<hier::Box::dir_t>(cut_dir),
+            solid.upper(static_cast<hier::Box::dir_t>(cut_dir)));
+         removeme.setLower(static_cast<hier::Box::dir_t>(cut_dir),
+            solid.upper(static_cast<hier::Box::dir_t>(cut_dir)) + 1);
+      } else {
+         cutme.setLower(static_cast<hier::Box::dir_t>(cut_dir),
+            solid.lower(static_cast<hier::Box::dir_t>(cut_dir)));
+         removeme.setUpper(static_cast<hier::Box::dir_t>(cut_dir),
+            solid.lower(static_cast<hier::Box::dir_t>(cut_dir)) - 1);
+      }
+
+      if (boxes) {
+         boxes->push_back(removeme);
+      }
+      if (pparams) {
+         total_weight += pparams->computeSplitWeight(removeme);
+      }
+   }
+
+   return total_weight;
+}
+
+}
 
 BalanceBoxBreaker::BalanceBoxBreaker(
    const PartitioningParams& pparams,
@@ -895,62 +982,7 @@ BalanceBoxBreaker::burstBox(
    const hier::Box& bursty,
    const hier::Box& solid)
 {
-   /*
-    * This method lacks logic to handle the case of solid not being
-    * completely inside bursty.  That feature is not currently needed.
-    */
-   TBOX_ASSERT(bursty.contains(solid));
-
-   const hier::IntVector solid_size = solid.numberCells();
-
-   boxes.clear();
-   hier::Box cutme = bursty;
-   while (!cutme.isSpatiallyEqual(solid)) {
-
-      int cut_dir = 999999;
-      bool cut_above_solid = false; // Whether to slice off the piece above solid (vs below).
-      /*
-       * Find direction and place to cut.  To minimize slivers, cut
-       * from cutme the thickest slab (in direction normal to cut)
-       * possible.
-       */
-      int slab_thickness = 0;
-      for (tbox::Dimension::dir_t d = 0; d < solid_size.getDim().getValue(); ++d) {
-         if (cutme.numberCells(d) > solid_size(d)) {
-            const int thickness_from_upper_cut = cutme.upper() (d)
-               - solid.upper() (d);
-            if (thickness_from_upper_cut > slab_thickness) {
-               slab_thickness = thickness_from_upper_cut;
-               cut_dir = d;
-               cut_above_solid = true;
-            }
-            const int thickness_from_lower_cut = solid.lower() (d)
-               - cutme.lower() (d);
-            if (thickness_from_lower_cut > slab_thickness) {
-               slab_thickness = thickness_from_lower_cut;
-               cut_dir = d;
-               cut_above_solid = false;
-            }
-         }
-      }
-      TBOX_ASSERT(cut_dir >= 0 && cut_dir < solid_size.getDim().getValue());
-
-      hier::Box removeme = cutme;
-      if (cut_above_solid) {
-         cutme.setUpper(static_cast<hier::Box::dir_t>(cut_dir),
-            solid.upper(static_cast<hier::Box::dir_t>(cut_dir)));
-         removeme.setLower(static_cast<hier::Box::dir_t>(cut_dir),
-            solid.upper(static_cast<hier::Box::dir_t>(cut_dir)) + 1);
-      } else {
-         cutme.setLower(static_cast<hier::Box::dir_t>(cut_dir),
-            solid.lower(static_cast<hier::Box::dir_t>(cut_dir)));
-         removeme.setUpper(static_cast<hier::Box::dir_t>(cut_dir),
-            solid.lower(static_cast<hier::Box::dir_t>(cut_dir)) - 1);
-      }
-
-      boxes.push_back(removeme);
-
-   }
+   (void)burstBoxImpl(&boxes, bursty, solid, 0);
 }
 
 /*
@@ -1085,7 +1117,7 @@ void BalanceBoxBreaker::TrialBreak::computeBreakData(
    }
    if (do_cut) {
       d_breakoff.push_back(box);
-      d_breakoff_load = computeBreakOffLoad(box);
+      d_breakoff_load = computeBreakOffLoad(box, &d_leftover);
    } else {
       d_leftover.clear(); 
       d_leftover.push_back(d_whole_box);
@@ -1101,20 +1133,50 @@ void BalanceBoxBreaker::TrialBreak::computeBreakData(
  *************************************************************************
  */
 double BalanceBoxBreaker::TrialBreak::computeBreakOffLoad(
-   const hier::Box& box)
+   const hier::Box& box,
+   const hier::BoxContainer* precomputed_leftover)
 {
    double breakoff_load = 0.0;
 
    if (d_corner_weights.empty()) {
       /*
-       * If there is no corner weight information, the breakoff load is
-       * box.size() multiplied by the ratio of the whole load to the whole
-       * box size.
+       * If there is no corner weight information, apportion the existing
+       * load according to box size.  For the linear model, weight every
+       * resulting box by its ghost-grown size and per-box intercept.  The
+       * normalization preserves the load of the original box while
+       * accounting for the additional ghost regions created by the split.
        */
-      breakoff_load = (d_whole_box_load /
-                       static_cast<double>(d_whole_box.size())) *
-                      static_cast<double>(box.size());
+      const double breakoff_weight = d_pparams->computeSplitWeight(box);
+      if (!std::isfinite(breakoff_weight) || breakoff_weight <= 0.0) {
+         TBOX_ERROR("BalanceBoxBreaker cannot use a non-positive or "
+            << "non-finite breakoff load.\n");
+      }
 
+      double total_weight = d_pparams->computeSplitWeight(d_whole_box);
+      if (d_pparams->usingLinearLoad()) {
+         total_weight = breakoff_weight;
+         if (precomputed_leftover) {
+            for (hier::BoxContainer::const_iterator bi =
+                    precomputed_leftover->begin();
+                 bi != precomputed_leftover->end(); ++bi) {
+               total_weight += d_pparams->computeSplitWeight(*bi);
+            }
+         } else {
+            total_weight += burstBoxImpl(
+               0,
+               d_whole_box,
+               box,
+               d_pparams);
+         }
+      }
+
+      if (!std::isfinite(total_weight) || total_weight <= 0.0) {
+         TBOX_ERROR("BalanceBoxBreaker cannot apportion a non-positive or "
+            << "non-finite load after splitting a box.\n");
+      }
+      breakoff_load = d_pparams->usingLinearLoad() ?
+         d_whole_box_load * breakoff_weight / total_weight :
+         (d_whole_box_load / total_weight) * breakoff_weight;
       if (breakoff_load < d_pparams->getArtificialMinimumLoad()) {
          breakoff_load = d_pparams->getArtificialMinimumLoad();
       }
