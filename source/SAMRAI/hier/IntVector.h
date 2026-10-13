@@ -1090,7 +1090,7 @@ public:
     * @param block_id  Optional block on which to compute the product.
     */
    long int
-   getProduct(const BlockId& block_id = BlockId::invalidId()) const noexcept
+   getProduct(const BlockId& block_id = BlockId{}) const noexcept
    {
 #ifdef DEBUG_CHECK_ASSERTIONS
       TBOX_ASSERT(block_id == BlockId::invalidId() ||

@@ -153,7 +153,7 @@ public:
    getBoundaries(
       const GlobalId& global_id,
       const int boundary_type,
-      const BlockId& block_id = BlockId::zero()) const;
+      const BlockId& block_id = BlockId{0}) const;
 
    /*!
     * @brief Get a vector of node boundary boxes for a specified patch.
@@ -169,7 +169,7 @@ public:
    const std::vector<BoundaryBox>&
    getNodeBoundaries(
       const GlobalId& global_id,
-      const BlockId& block_id = BlockId::zero()) const
+      const BlockId& block_id = BlockId{0}) const
    {
       return getBoundaries(global_id, getDim().getValue(), block_id);
    }
@@ -191,7 +191,7 @@ public:
    const std::vector<BoundaryBox>&
    getEdgeBoundaries(
       const GlobalId& global_id,
-      const BlockId& block_id = BlockId::zero()) const
+      const BlockId& block_id = BlockId{0}) const
    {
 #ifdef DEBUG_CHECK_ASSERTIONS
       if (getDim().getValue() < 2) {
@@ -219,7 +219,7 @@ public:
    const std::vector<BoundaryBox>&
    getFaceBoundaries(
       const GlobalId& global_id,
-      const BlockId& block_id = BlockId::zero()) const
+      const BlockId& block_id = BlockId{0}) const
    {
 #ifdef DEBUG_CHECK_ASSERTIONS
       if (getDim().getValue() < 3) {
