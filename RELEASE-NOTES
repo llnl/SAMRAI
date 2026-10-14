@@ -4,7 +4,7 @@
   All rights reserved.
 *****************************************************************************
 
-                     Release Notes for SAMRAI v4.6.0
+                     Release Notes for SAMRAI v4.6.1
 
      (notes for previous releases may be found in /SAMRAI/docs/release)
 
@@ -24,6 +24,19 @@ Please post an issue on github https://github.com/LLNL/SAMRAI
 
 
 ****************************************************************************
+
+Minor patch release:
+
+v4.6.1 is a minor patch release to revert some usage of constexpr get
+functions that were used for the default values of function
+arguments in hier::IntVector and hier::CoarseFineBoundary.  These caused
+unexpected compile errors on certain platforms, so the patches have
+been applied in those two classes.
+
+****************************************************************************
+
+The remaining contents of the v4.6.0 release notes are preserved below:
+
 
 ----------------------------------------------------------------------------
                 Significant bug fixes

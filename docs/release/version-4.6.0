@@ -1,0 +1,159 @@
+*****************************************************************************
+  Copyright 1997-2026
+  Lawrence Livermore National Security, LLC.
+  All rights reserved.
+*****************************************************************************
+
+                     Release Notes for SAMRAI v4.6.0
+
+     (notes for previous releases may be found in /SAMRAI/docs/release)
+
+*****************************************************************************
+
+
+Where to report Bugs
+--------------------
+
+If a bug is found in the SAMRAI library, we ask that you kindly report
+it to us so that we may fix it.
+
+Please post an issue on github https://github.com/LLNL/SAMRAI
+
+*****************************************************************************
+
+
+
+****************************************************************************
+
+----------------------------------------------------------------------------
+                Significant bug fixes
+----------------------------------------------------------------------------
+
+1) RefineSchedule no longer applies overly restrictive conditions when
+computing overlaps between source and destination patches that touch at
+their boundaries but do not overlap in their interiors.  These overlaps
+are required for data types centered on cell boundaries, including node,
+face, side, and edge data.  This fix may change numerical results; the
+changes should improve accuracy by adding overlaps that were previously
+missed.  The GitHub pull request for this fix is
+https://github.com/llnl/SAMRAI/pull/312
+
+2) A bug where using the artificial_minimum_load parameter did not work
+when the use_vouchers option set to TRUE in CascadePartitioner has been fixed.
+artificial_minimum_load now works consistently with both the default
+BoxTransitSet path and the optional use_vouchers path.
+
+3) IntVector::sortIntVector previously did not work correctly for multiblock
+IntVectors.  It sorted every block's values according to the sorting order
+computed for Block 0.  This has been fixed to sort each block's values
+independently.  The method also relied on an incorrect assumption that
+the calling `this` IntVector had the same number of blocks as the input
+IntVector.  This caused the risk of size-based memory access errors.  Since
+the method's contract is fully state-replacing for the calling object, it
+has been fixed to check the size of the calling IntVector and resize it 
+to the size of the input IntVector when necessary.
+
+4) A bug in ConduitDatabase::getBoolVector which incorrectly queried Conduit
+to obtain the number of elements in the input Conduit node has been fixed.
+
+
+
+*****************************************************************************
+
+
+****************************************************************************
+
+-----------------------------------------------------------------------------
+                Summary of what's new
+-----------------------------------------------------------------------------
+
+1) BoxContainer now provides move construction, move assignment, and
+emplaceFront/emplaceBack operations for constructing Boxes in place.
+Box also has a move constructor.
+
+2) CellIndex, NodeIndex, EdgeIndex, FaceIndex, and SideIndex now provide
+type-safe arithmetic operators within each derived type.  Invalid
+arithmetic between different derived index types is rejected.
+
+-----------------------------------------------------------------------------
+                Summary of what's changed
+-----------------------------------------------------------------------------
+
+1) A broad set of low-level classes in hier and tbox has been modernized
+with constexpr and noexcept functions, explicitly defaulted or deleted
+special member functions, standard-library array/optional storage, and
+move-aware implementations.
+
+2) Implicit conversion from Index to IntVector has been disabled by making
+the IntVector constructor taking an Index explicit.  This is an API change
+that may affect call sites in user codes.
+
+3) The minimum C++ standard for the source and test code is now C++20.
+
+4) BlueprintUtils and PatchHierarchy now provide expanded support for
+Conduit Blueprint meshes, including application-supplied field data,
+configurable topology names, and detailed coarse/fine adjacency extents.
+
+-----------------------------------------------------------------------------
+                Details about what's new
+-----------------------------------------------------------------------------
+
+1) BoxContainer emplace operations forward Box constructor arguments and
+invalidate its cached search tree when needed.  Move operations transfer
+the container storage and state without copying all Boxes.  These additions
+are intended to reduce temporary Box construction in hierarchy and mesh
+algorithms.
+
+2) Arithmetic overloads for the data-centered index classes check dimension
+and, where applicable, axis compatibility.  The overloads prevent accidental
+operations, such as adding a NodeIndex to a CellIndex, while retaining
+operations using a single derived type, as well as operations that use
+hier::Index and a derived type.
+
+
+-----------------------------------------------------------------------------
+                Details about what's changed
+-----------------------------------------------------------------------------
+
+1) The modernization of hier and tbox replaces a number of hand-written
+constructors, destructors, and copy operations with compiler-generated
+special members.  Several internal raw-pointer arrays and manually managed
+objects now use std::array, std::optional, std::unique_ptr, or move
+operations.  This includes Box, Index, IntVector, DatabaseBox,
+BoxContainer, and BoxLevel-related objects.
+
+2) Implicit conversion from Index to IntVector has been disabled by making
+the IntVector constructor taking an Index explicit.  Any user codes relying
+on this implicit conversion will need to change to explicitly construct an
+IntVector.  This change protects against potentially bug-prone confusion
+of these two similar types, as well as helping to avoid repeated
+silent invocations of the IntVector constructor caused by usage such as
+passing an Index for a function argument that is declared IntVector.
+
+3) The minimum C++ standard for the source and test code is now C++20.  In
+particular, variable-length arrays have been replaced with standard-library
+containers, and deprecated random_shuffle use in the tree search performance
+test has been replaced with std::shuffle.
+
+4) BlueprintUtils::putFieldsToDatabase walks the full hierarchy and limits
+field output to the visible portions represented by the flattened hierarchy.
+For each appropriate Blueprint domain, it calls the application-provided
+BlueprintUtilsStrategy::putFieldsToDomainDatabase callback.  The strategy
+supplies a default no-op implementation, so existing mesh-only Blueprint
+output remains supported.  BlueprintUtils also stores a configurable
+topology name and provides access to it through setTopologyName() and
+getTopologyName(), replacing use of hard-coded strings for this name.
+
+PatchHierarchy::makeAdjacencySets() now computes partial coarse/fine overlap
+extents independently in every active coordinate direction.  The previous
+scalar partial_lo and partial_hi values are replaced by dimension-sized
+IntVectors; a positive-modulo calculation handles negative coordinates and
+each direction is adjusted independently.  The resulting values are stored
+as per-direction Blueprint databases on the fine-side window.  This
+preserves alignment information when a corner of a fine domain does not
+align with a node of a coarse domain at a coarse-fine interface.
+
+
+
+=============================================================================
+=============================================================================
