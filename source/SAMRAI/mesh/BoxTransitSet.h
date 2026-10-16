@@ -93,6 +93,15 @@ public:
       const hier::BoxContainer& box_container,
       double minimum_load);
 
+   /*!
+    * @brief Insert boxes with loads computed by the configured load model.
+    *
+    * @param[in] other Box container whose boxes are inserted.
+    */
+   void
+   insertAllWithModeledLoad(
+      const hier::BoxContainer& other);
+
    //! @copydoc TransitLoad::insertAll( TransitLoad & )
    void
    insertAll(
