@@ -1,0 +1,218 @@
+// Generated SAMRAI regression baseline.
+step_number_00 {
+   level_number_0000 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 3
+      d_ratio_0 = 1, 1
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(10,4),(23,19)]
+         local_indices = 3
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 3
+      }
+   }
+   level_number_0001 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 3
+      d_ratio_0 = 2, 2
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         mapped_box_set_size = 0
+      }
+   }
+   level_number_0002 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 3
+      d_ratio_0 = 4, 4
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(32,0),(39,9)]
+         local_indices = 2
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 3
+      }
+   }
+}
+step_number_01 {
+   level_number_0000 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 3
+      d_ratio_0 = 1, 1
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(10,4),(23,19)]
+         local_indices = 3
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 3
+      }
+   }
+   level_number_0001 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 3
+      d_ratio_0 = 2, 2
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         mapped_box_set_size = 0
+      }
+   }
+   level_number_0002 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 3
+      d_ratio_0 = 4, 4
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(32,0),(39,13)]
+         local_indices = 2
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 3
+      }
+   }
+   level_number_0003 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 3
+      d_ratio_0 = 8, 8
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(80,32),(89,39)]
+         local_indices = 2
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 3
+      }
+   }
+   level_number_0004 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 3
+      d_ratio_0 = 16, 16
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(160,64),(173,75)]
+         local_indices = 4
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 3
+      }
+   }
+}
+step_number_02 {
+   level_number_0000 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 3
+      d_ratio_0 = 1, 1
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(10,4),(23,19)]
+         local_indices = 3
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 3
+      }
+   }
+   level_number_0001 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 3
+      d_ratio_0 = 2, 2
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(20,8),(27,15)]
+         local_indices = 2
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 3
+      }
+   }
+   level_number_0002 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 3
+      d_ratio_0 = 4, 4
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(40,16),(51,25)]
+         local_indices = 3
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 3
+      }
+   }
+   level_number_0003 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 3
+      d_ratio_0 = 8, 8
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(70,30),(79,43)]
+         local_indices = 3
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 3
+      }
+   }
+   level_number_0004 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 3
+      d_ratio_0 = 16, 16
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(168,64),(189,81)]
+         local_indices = 3
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 3
+      }
+   }
+}
