@@ -36,7 +36,7 @@
 #include "SAMRAI/tbox/BalancedDepthFirstTree.h"
 #include "SAMRAI/tbox/BreadthFirstRankTree.h"
 #include "SAMRAI/tbox/CenteredRankTree.h"
-#include "SAMRAI/tbox/HDFDatabase.h"
+#include "test/testlib/BaselineData.h"
 #include "SAMRAI/tbox/InputDatabase.h"
 #include "SAMRAI/tbox/InputManager.h"
 #include "SAMRAI/tbox/MathUtilities.h"
@@ -507,20 +507,17 @@ int main(
             "main: If given, baseline_action must be \"GENERATE\" or \"COMPARE\" or \"NONE\"");
       }
 
-#ifdef HAVE_HDF5
-      std::shared_ptr<tbox::HDFDatabase> baseline_db(
-         new tbox::HDFDatabase("LoadBalanceCorrectness baseline"));
+      testlib::BaselineData baseline_data("LoadBalanceCorrectness baseline");
 
       if (baseline_action == 'g') {
-         baseline_db->create(baseline_filename);
+         baseline_data.create(baseline_filename);
       } else if (baseline_action == 'c') {
-         baseline_db->open(baseline_filename);
+         if (!baseline_data.open(baseline_filename)) {
+            TBOX_WARNING("Could not open baseline " << baseline_filename
+               << ".baseline.  Skipping regression comparison.\n");
+            baseline_action = 'n';
+         }
       }
-#else
-      TBOX_WARNING("HDF5 is not available.\n"
-         << "Skipping baseline comparison and generation.\n"
-         << "This means no regression checks!\n");
-#endif
 
       plog << "Input database after initialization..." << std::endl;
       input_db->printClassData(plog);
@@ -585,14 +582,13 @@ int main(
 
          outputPrebalance(L0, domain_box_level, hierarchy->getRequiredConnectorWidth(0, 0), "L0: ");
 
-#ifdef HAVE_HDF5
          if (baseline_action == 'g') {
             std::shared_ptr<tbox::Database> prebalance_L0_db =
-               baseline_db->putDatabase("prebalance BoxLevel 0");
+               baseline_data.getDatabase()->putDatabase("prebalance_BoxLevel_0");
             L0.putToRestart(prebalance_L0_db);
          } else if (baseline_action == 'c') {
             std::shared_ptr<tbox::Database> prebalance_L0_db =
-               baseline_db->getDatabase("prebalance BoxLevel 0");
+               baseline_data.getDatabase()->getDatabase("prebalance_BoxLevel_0");
             std::shared_ptr<hier::BoxLevel> baseline_prebalance_L0(
                new hier::BoxLevel(
                   dim,
@@ -612,7 +608,6 @@ int main(
                           << baseline_prebalance_L0->format("Baseline prebalance: ", 2);
             }
          }
-#endif
 
          if (load_balance[0]) {
             const hier::BoxLevel L0before(L0);
@@ -631,14 +626,13 @@ int main(
             error_count += checkBalanceCorrectness(L0before, L0);
          }
 
-#ifdef HAVE_HDF5
          if (baseline_action == 'g') {
             std::shared_ptr<tbox::Database> postbalance_box_level_db =
-               baseline_db->putDatabase("postbalance BoxLevel 0");
+               baseline_data.getDatabase()->putDatabase("postbalance_BoxLevel_0");
             L0.putToRestart(postbalance_box_level_db);
          } else if (baseline_action == 'c') {
             std::shared_ptr<tbox::Database> postbalance_L0_db =
-               baseline_db->getDatabase("postbalance BoxLevel 0");
+               baseline_data.getDatabase()->getDatabase("postbalance_BoxLevel_0");
             std::shared_ptr<hier::BoxLevel> baseline_postbalance_L0(
                new hier::BoxLevel(
                   dim,
@@ -658,7 +652,6 @@ int main(
                           << baseline_postbalance_L0->format("Baseline postbalance: ", 2);
             }
          }
-#endif
 
          sortNodes(L0,
             *domain_to_L0,
@@ -781,14 +774,13 @@ int main(
 
          outputPrebalance(*L1, L0, required_connector_width, "L1: ");
 
-#ifdef HAVE_HDF5
          if (baseline_action == 'g') {
             std::shared_ptr<tbox::Database> prebalance_box_level_db =
-               baseline_db->putDatabase("prebalance BoxLevel 1");
+               baseline_data.getDatabase()->putDatabase("prebalance_BoxLevel_1");
             L1->putToRestart(prebalance_box_level_db);
          } else if (baseline_action == 'c') {
             std::shared_ptr<tbox::Database> prebalance_L1_db =
-               baseline_db->getDatabase("prebalance BoxLevel 1");
+               baseline_data.getDatabase()->getDatabase("prebalance_BoxLevel_1");
             std::shared_ptr<hier::BoxLevel> baseline_prebalance_L1(
                new hier::BoxLevel(
                   dim,
@@ -808,7 +800,6 @@ int main(
                           << baseline_prebalance_L1->format("Baseline prebalance: ", 2);
             }
          }
-#endif
 
          if (load_balance[1]) {
             const hier::BoxLevel L1before(*L1);
@@ -827,14 +818,13 @@ int main(
             error_count += checkBalanceCorrectness(L1before, *L1);
          }
 
-#ifdef HAVE_HDF5
          if (baseline_action == 'g') {
             std::shared_ptr<tbox::Database> postbalance_box_level_db =
-               baseline_db->putDatabase("postbalance BoxLevel 1");
+               baseline_data.getDatabase()->putDatabase("postbalance_BoxLevel_1");
             L1->putToRestart(postbalance_box_level_db);
          } else if (baseline_action == 'c') {
             std::shared_ptr<tbox::Database> postbalance_L1_db =
-               baseline_db->getDatabase("postbalance BoxLevel 1");
+               baseline_data.getDatabase()->getDatabase("postbalance_BoxLevel_1");
             std::shared_ptr<hier::BoxLevel> baseline_postbalance_L1(
                new hier::BoxLevel(
                   dim,
@@ -854,7 +844,6 @@ int main(
                           << baseline_postbalance_L1->format("Baseline postbalance: ", 2);
             }
          }
-#endif
 
          sortNodes(*L1,
             *L0_to_L1,
@@ -979,14 +968,13 @@ int main(
 
          outputPrebalance(*L2, L1, required_connector_width, "L2: ");
 
-#ifdef HAVE_HDF5
          if (baseline_action == 'g') {
             std::shared_ptr<tbox::Database> prebalance_box_level_db =
-               baseline_db->putDatabase("prebalance BoxLevel 2");
+               baseline_data.getDatabase()->putDatabase("prebalance_BoxLevel_2");
             L2->putToRestart(prebalance_box_level_db);
          } else if (baseline_action == 'c') {
             std::shared_ptr<tbox::Database> prebalance_L2_db =
-               baseline_db->getDatabase("prebalance BoxLevel 2");
+               baseline_data.getDatabase()->getDatabase("prebalance_BoxLevel_2");
             std::shared_ptr<hier::BoxLevel> baseline_prebalance_L2(
                new hier::BoxLevel(
                   dim,
@@ -1006,7 +994,6 @@ int main(
                           << baseline_prebalance_L2->format("Baseline prebalance: ", 2);
             }
          }
-#endif
 
          if (load_balance[2]) {
             const hier::BoxLevel L2before(*L2);
@@ -1025,14 +1012,13 @@ int main(
             error_count += checkBalanceCorrectness(L2before, *L2);
          }
 
-#ifdef HAVE_HDF5
          if (baseline_action == 'g') {
             std::shared_ptr<tbox::Database> postbalance_box_level_db =
-               baseline_db->putDatabase("postbalance BoxLevel 2");
+               baseline_data.getDatabase()->putDatabase("postbalance_BoxLevel_2");
             L2->putToRestart(postbalance_box_level_db);
          } else if (baseline_action == 'c') {
             std::shared_ptr<tbox::Database> postbalance_L2_db =
-               baseline_db->getDatabase("postbalance BoxLevel 2");
+               baseline_data.getDatabase()->getDatabase("postbalance_BoxLevel_2");
             std::shared_ptr<hier::BoxLevel> baseline_postbalance_L2(
                new hier::BoxLevel(
                   dim,
@@ -1052,7 +1038,6 @@ int main(
                           << baseline_postbalance_L2->format("Baseline postbalance: ", 2);
             }
          }
-#endif
 
          sortNodes(*L2,
             *L1_to_L2,

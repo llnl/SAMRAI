@@ -21,11 +21,8 @@ AutoTester::AutoTester(
    const tbox::Dimension& dim,
    std::shared_ptr<tbox::Database> input_db):
    d_dim(dim),
-   d_base_name("unnamed")
-#ifdef HAVE_HDF5
-   ,
-   d_hdf_db("AutoTesterDatabase")
-#endif
+   d_base_name("unnamed"),
+   d_baseline_data("AutoTesterDatabase")
 {
    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
    d_object_name = object_name;
@@ -50,29 +47,32 @@ AutoTester::AutoTester(
 #endif
    test_patch_boxes_filename += d_base_name + ".boxes";
 
-   const std::string hdf_filename =
+   const std::string baseline_filename =
       test_patch_boxes_filename
       + "." + tbox::Utilities::nodeToString(mpi.getSize())
       + "." + tbox::Utilities::processorToString(mpi.getRank());
 
-#ifdef HAVE_HDF5
    if (d_read_patch_boxes) {
-      d_hdf_db.open(hdf_filename);
-      if (d_output_correct) {
-         d_hdf_db.printClassData(tbox::pout);
+      if (!d_baseline_data.open(baseline_filename)) {
+         TBOX_WARNING("Could not open baseline " << baseline_filename
+            << ".baseline.  Skipping regression comparison.\n");
+         d_read_patch_boxes = false;
+      }
+      if (d_read_patch_boxes && d_output_correct) {
+         d_baseline_data.getDatabase()->printClassData(tbox::pout);
       }
 
    }
 
    if (d_write_patch_boxes) {
-      d_hdf_db.create(hdf_filename);
+      d_baseline_data.create(baseline_filename);
    }
-#endif
 
 }
 
 AutoTester::~AutoTester()
 {
+   d_baseline_data.close();
 }
 
 /*
@@ -214,11 +214,10 @@ int AutoTester::evalTestData(
 
       int num_levels = hierarchy->getNumberOfLevels();
 
-#ifdef HAVE_HDF5
       if (d_read_patch_boxes) {
 
          if (d_output_correct) {
-            d_hdf_db.printClassData(tbox::pout);
+            d_baseline_data.getDatabase()->printClassData(tbox::pout);
          }
 
          const std::string step_name =
@@ -227,7 +226,7 @@ int AutoTester::evalTestData(
                2);
          std::cout << std::endl;
          std::shared_ptr<tbox::Database> step_db(
-            d_hdf_db.getDatabase(step_name));
+            d_baseline_data.getDatabase()->getDatabase(step_name));
 
          /*
           * TODO: This check give false positives!!!!!
@@ -261,7 +260,7 @@ int AutoTester::evalTestData(
                2);
          std::cout << std::endl;
          std::shared_ptr<tbox::Database> step_db(
-            d_hdf_db.putDatabase(step_name));
+            d_baseline_data.getDatabase()->putDatabase(step_name));
 
          for (int ln = 0; ln < num_levels; ++ln) {
             std::shared_ptr<hier::PatchLevel> level(
@@ -275,10 +274,9 @@ int AutoTester::evalTestData(
          }
 
          if (d_output_correct) {
-            d_hdf_db.printClassData(tbox::pout);
+            d_baseline_data.getDatabase()->printClassData(tbox::pout);
          }
       }
-#endif
 
       ++d_test_patch_boxes_step_count;
 
@@ -396,11 +394,10 @@ int AutoTester::evalTestData(
 
       int num_levels = hierarchy->getNumberOfLevels();
 
-#ifdef HAVE_HDF5
       if (d_read_patch_boxes) {
 
          if (d_output_correct) {
-            d_hdf_db.printClassData(tbox::pout);
+            d_baseline_data.getDatabase()->printClassData(tbox::pout);
          }
 
          const std::string step_name =
@@ -409,7 +406,7 @@ int AutoTester::evalTestData(
                2);
          std::cout << std::endl;
          std::shared_ptr<tbox::Database> step_db(
-            d_hdf_db.getDatabase(step_name));
+            d_baseline_data.getDatabase()->getDatabase(step_name));
 
          for (int ln = 0; ln < num_levels; ++ln) {
 
@@ -432,7 +429,7 @@ int AutoTester::evalTestData(
       if (d_write_patch_boxes) {
 
          if (d_output_correct) {
-            d_hdf_db.printClassData(tbox::pout);
+            d_baseline_data.getDatabase()->printClassData(tbox::pout);
          }
 
          const std::string step_name =
@@ -441,7 +438,7 @@ int AutoTester::evalTestData(
                2);
          std::cout << std::endl;
          std::shared_ptr<tbox::Database> step_db(
-            d_hdf_db.putDatabase(step_name));
+            d_baseline_data.getDatabase()->putDatabase(step_name));
 
          for (int ln = 0; ln < num_levels; ++ln) {
             std::shared_ptr<hier::PatchLevel> level(
@@ -455,7 +452,6 @@ int AutoTester::evalTestData(
          }
 
       }
-#endif
 
       ++d_test_patch_boxes_step_count;
 

@@ -72,12 +72,24 @@ public:
     * is ignored on other nodes and may be set to NULL.  Multiple input
     * files may be parsed by calling parse() for each file, but all variables
     * are reset at the beginning of each parse.
+    *
+    * When @p read_locally is true, every rank reads its own file stream.
+    * This is intended for rank-local auxiliary data; normal application
+    * input should retain the default collective behavior.
+    *
+    * @param filename Name of the input file
+    * @param fstream Open input stream.  In collective mode, it is required
+    *                only on rank zero.
+    * @param database Database that receives the parsed key-value pairs.
+    * @param read_locally When true, each rank reads from its own @p fstream
+    *                     without broadcasting input from rank zero.
     */
    int
    parse(
       const std::string& filename,
       FILE* fstream,
-      const std::shared_ptr<Database>& database);
+      const std::shared_ptr<Database>& database,
+      bool read_locally = false);
 
    /**
     * Return the total number of errors resulting from the parse.
@@ -250,6 +262,7 @@ private:
    static bool s_static_tables_initialized;
 
    std::string d_pathname;           // path to filename for including
+   bool d_read_locally;
 };
 
 }

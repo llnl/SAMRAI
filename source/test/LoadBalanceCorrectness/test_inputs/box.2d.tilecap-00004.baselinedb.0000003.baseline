@@ -1,0 +1,93 @@
+// Generated SAMRAI regression baseline.
+postbalance_BoxLevel_0 {
+   HIER_MAPPED_BOX_LEVEL_VERSION = 0
+   d_is_mapped_box_level = TRUE
+   d_nproc = 4
+   d_rank = 3
+   d_ratio_0 = 1, 1
+   dim = 2
+   mapped_boxes {
+      HIER_BOX_CONTAINER_VERSION = 0
+      block_ids = 0
+      boxes = [(30,30),(49,49)]
+      local_indices = 3
+      mapped_box_set_size = 1
+      periodic_ids = 0
+      ranks = 3
+   }
+}
+postbalance_BoxLevel_1 {
+   HIER_MAPPED_BOX_LEVEL_VERSION = 0
+   d_is_mapped_box_level = TRUE
+   d_nproc = 4
+   d_rank = 3
+   d_ratio_0 = 3, 3
+   dim = 2
+   mapped_boxes {
+      HIER_BOX_CONTAINER_VERSION = 0
+      block_ids = 0, 0
+      boxes = [(90,60),(119,89)], [(90,90),(119,119)]
+      local_indices = 7, 8
+      mapped_box_set_size = 2
+      periodic_ids = 0, 0
+      ranks = 3, 3
+   }
+}
+postbalance_BoxLevel_2 {
+   HIER_MAPPED_BOX_LEVEL_VERSION = 0
+   d_is_mapped_box_level = TRUE
+   d_nproc = 4
+   d_rank = 3
+   d_ratio_0 = 9, 9
+   dim = 2
+   mapped_boxes {
+      HIER_BOX_CONTAINER_VERSION = 0
+      block_ids = 0, 0
+      boxes = [(240,210),(269,239)], [(240,240),(269,269)]
+      local_indices = 7, 8
+      mapped_box_set_size = 2
+      periodic_ids = 0, 0
+      ranks = 3, 3
+   }
+}
+prebalance_BoxLevel_0 {
+   HIER_MAPPED_BOX_LEVEL_VERSION = 0
+   d_is_mapped_box_level = TRUE
+   d_nproc = 4
+   d_rank = 3
+   d_ratio_0 = 1, 1
+   dim = 2
+   mapped_boxes {
+      HIER_BOX_CONTAINER_VERSION = 0
+      mapped_box_set_size = 0
+   }
+}
+prebalance_BoxLevel_1 {
+   HIER_MAPPED_BOX_LEVEL_VERSION = 0
+   d_is_mapped_box_level = TRUE
+   d_nproc = 4
+   d_rank = 3
+   d_ratio_0 = 3, 3
+   dim = 2
+   mapped_boxes {
+      HIER_BOX_CONTAINER_VERSION = 0
+      block_ids = 0
+      boxes = [(90,90),(119,119)]
+      local_indices = 0
+      mapped_box_set_size = 1
+      periodic_ids = 0
+      ranks = 3
+   }
+}
+prebalance_BoxLevel_2 {
+   HIER_MAPPED_BOX_LEVEL_VERSION = 0
+   d_is_mapped_box_level = TRUE
+   d_nproc = 4
+   d_rank = 3
+   d_ratio_0 = 9, 9
+   dim = 2
+   mapped_boxes {
+      HIER_BOX_CONTAINER_VERSION = 0
+      mapped_box_set_size = 0
+   }
+}

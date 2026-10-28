@@ -1,0 +1,160 @@
+// Generated SAMRAI regression baseline.
+step_number_00 {
+   level_number_0000 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 0
+      d_ratio_0 = 1, 1
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(30,0),(59,29)]
+         local_indices = 0
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 0
+      }
+   }
+   level_number_0001 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 0
+      d_ratio_0 = 4, 4
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(120,80),(159,119)]
+         local_indices = 0
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 0
+      }
+   }
+   level_number_0002 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 0
+      d_ratio_0 = 16, 16
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0, 0, 0, 0, 0, 0, 0
+         boxes = [(504,408),(527,423)], [(528,408),(551,455)], [(568,408),(591,423)], [(552,424),(591,463)], [(552,464),(591,503)], [(552,504),(591,539)], [(552,540),(591,575)]
+         local_indices = 0, 1, 2, 3, 4, 5, 6
+         mapped_box_set_size = 7
+         periodic_ids = 0, 0, 0, 0, 0, 0, 0
+         ranks = 0, 0, 0, 0, 0, 0, 0
+      }
+   }
+}
+step_number_01 {
+   level_number_0000 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 0
+      d_ratio_0 = 1, 1
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(30,0),(59,29)]
+         local_indices = 0
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 0
+      }
+   }
+   level_number_0001 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 0
+      d_ratio_0 = 4, 4
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(120,72),(167,119)]
+         local_indices = 0
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 0
+      }
+   }
+   level_number_0002 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 0
+      d_ratio_0 = 16, 16
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+         boxes = [(504,424),(519,439)], [(520,424),(535,455)], [(352,360),(371,403)], [(536,424),(571,467)], [(536,468),(571,511)], [(536,512),(571,555)], [(536,556),(571,599)], [(572,424),(607,467)], [(572,468),(607,511)], [(572,512),(607,555)], [(572,556),(607,599)]
+         local_indices = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+         mapped_box_set_size = 11
+         periodic_ids = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+         ranks = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      }
+   }
+}
+step_number_02 {
+   level_number_0000 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 0
+      d_ratio_0 = 1, 1
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(30,0),(59,29)]
+         local_indices = 0
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 0
+      }
+   }
+   level_number_0001 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 0
+      d_ratio_0 = 4, 4
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0
+         boxes = [(120,72),(167,119)]
+         local_indices = 0
+         mapped_box_set_size = 1
+         periodic_ids = 0
+         ranks = 0
+      }
+   }
+   level_number_0002 {
+      HIER_MAPPED_BOX_LEVEL_VERSION = 0
+      d_is_mapped_box_level = TRUE
+      d_nproc = 4
+      d_rank = 0
+      d_ratio_0 = 16, 16
+      dim = 2
+      mapped_boxes {
+         HIER_BOX_CONTAINER_VERSION = 0
+         block_ids = 0, 0, 0, 0, 0, 0, 0, 0, 0
+         boxes = [(480,336),(527,383)], [(480,384),(527,431)], [(480,432),(527,479)], [(528,336),(575,383)], [(528,384),(575,431)], [(528,432),(575,479)], [(576,336),(623,383)], [(576,384),(623,431)], [(576,432),(623,479)]
+         local_indices = 0, 1, 2, 3, 4, 5, 6, 7, 8
+         mapped_box_set_size = 9
+         periodic_ids = 0, 0, 0, 0, 0, 0, 0, 0, 0
+         ranks = 0, 0, 0, 0, 0, 0, 0, 0, 0
+      }
+   }
+}

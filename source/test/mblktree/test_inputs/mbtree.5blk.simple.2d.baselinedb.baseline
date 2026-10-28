@@ -1,0 +1,70 @@
+// Generated SAMRAI regression baseline.
+Connector {
+   HIER_BOX_NBRHD_COLLECTION_VERSION = 0
+   d_is_edge_set = TRUE
+   local_indices = 0, 1, 2, 3, 4
+   number_of_sets = 5
+   owners = 0, 0, 0, 0, 0
+   periodic_ids = 0, 0, 0, 0, 0
+   set_for_local_id_000000000000000 {
+      block_ids = 0, 1, 2, 3, 4
+      boxes = [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)]
+      local_indices = 0, 1, 2, 3, 4
+      mapped_box_set_size = 5
+      periodic_ids = 0, 0, 0, 0, 0
+      ranks = 0, 0, 0, 0, 0
+   }
+   set_for_local_id_000000000000010 {
+      block_ids = 0, 1, 2, 3, 4
+      boxes = [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)]
+      local_indices = 0, 1, 2, 3, 4
+      mapped_box_set_size = 5
+      periodic_ids = 0, 0, 0, 0, 0
+      ranks = 0, 0, 0, 0, 0
+   }
+   set_for_local_id_000000000000020 {
+      block_ids = 0, 1, 2, 3, 4
+      boxes = [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)]
+      local_indices = 0, 1, 2, 3, 4
+      mapped_box_set_size = 5
+      periodic_ids = 0, 0, 0, 0, 0
+      ranks = 0, 0, 0, 0, 0
+   }
+   set_for_local_id_000000000000030 {
+      block_ids = 0, 1, 2, 3, 4
+      boxes = [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)]
+      local_indices = 0, 1, 2, 3, 4
+      mapped_box_set_size = 5
+      periodic_ids = 0, 0, 0, 0, 0
+      ranks = 0, 0, 0, 0, 0
+   }
+   set_for_local_id_000000000000040 {
+      block_ids = 0, 1, 2, 3, 4
+      boxes = [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)]
+      local_indices = 0, 1, 2, 3, 4
+      mapped_box_set_size = 5
+      periodic_ids = 0, 0, 0, 0, 0
+      ranks = 0, 0, 0, 0, 0
+   }
+}
+MappedBoxLevel {
+   HIER_MAPPED_BOX_LEVEL_VERSION = 0
+   d_is_mapped_box_level = TRUE
+   d_nproc = 1
+   d_rank = 0
+   d_ratio_0 = 1, 1
+   d_ratio_1 = 1, 1
+   d_ratio_2 = 1, 1
+   d_ratio_3 = 1, 1
+   d_ratio_4 = 1, 1
+   dim = 2
+   mapped_boxes {
+      HIER_BOX_CONTAINER_VERSION = 0
+      block_ids = 0, 1, 2, 3, 4
+      boxes = [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)], [(0,0),(19,19)]
+      local_indices = 0, 1, 2, 3, 4
+      mapped_box_set_size = 5
+      periodic_ids = 0, 0, 0, 0, 0
+      ranks = 0, 0, 0, 0, 0
+   }
+}

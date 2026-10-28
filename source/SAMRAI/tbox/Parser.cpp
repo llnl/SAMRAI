@@ -51,6 +51,8 @@ bool Parser::s_static_tables_initialized = 0;
  */
 
 Parser::Parser()
+   :
+   d_read_locally(false)
 {
    if (!s_static_tables_initialized) {
       parser_static_table_initialize();
@@ -83,10 +85,12 @@ int
 Parser::parse(
    const std::string& filename,
    FILE* fstream,
-   const std::shared_ptr<Database>& database)
+   const std::shared_ptr<Database>& database,
+   bool read_locally)
 {
    d_errors = 0;
    d_warnings = 0;
+   d_read_locally = read_locally;
 
    // Find the path in the filename, if one exists
    std::string::size_type slash_pos = filename.find_last_of('/');
@@ -268,13 +272,15 @@ Parser::pushIncludeFile(
       filename_with_path += filename;
    }
 
-   if (mpi.getRank() == 0) {
+   if (d_read_locally || mpi.getRank() == 0) {
       fstream = fopen(filename_with_path.c_str(), "r");
    }
 
    int worked = (fstream ? 1 : 0);
 
-   mpi.Bcast(&worked, 1, MPI_INT, 0);
+   if (!d_read_locally) {
+      mpi.Bcast(&worked, 1, MPI_INT, 0);
+   }
 
    if (!worked) {
       error("Could not open include file ``" + filename_with_path + "''");
@@ -326,15 +332,17 @@ Parser::yyinput(
 {
    const SAMRAI_MPI& mpi(SAMRAI_MPI::getSAMRAIWorld());
    int byte = 0;
-   if (mpi.getRank() == 0) {
+   if (d_read_locally || mpi.getRank() == 0) {
       byte = static_cast<int>(fread(buffer,
                                  1,
                                  max_size,
                                  d_parse_stack.front().d_fstream));
    }
-   mpi.Bcast(&byte, 1, MPI_INT, 0);
-   if (byte > 0) {
-      mpi.Bcast(buffer, byte, MPI_CHAR, 0);
+   if (!d_read_locally) {
+      mpi.Bcast(&byte, 1, MPI_INT, 0);
+      if (byte > 0) {
+         mpi.Bcast(buffer, byte, MPI_CHAR, 0);
+      }
    }
    return byte;
 }
