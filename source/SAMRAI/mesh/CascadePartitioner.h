@@ -250,6 +250,30 @@ public:
    }
 
    /*!
+    * @brief Update per-level linear load model coefficients.
+    *
+    * If fewer values are provided than hierarchy levels, the last value is
+    * used for all finer levels.
+    */
+   void
+   updateLoadModelCoefficients(
+      const std::vector<bool>& using_linear_load,
+      const std::vector<double>& linear_load_slope,
+      const std::vector<double>& linear_load_intercept);
+
+   /*!
+    * @brief Select application patch data whose ghost widths contribute to
+    * the linear load model.
+    *
+    * The component-wise maximum ghost width of these registered data
+    * factories is used.  An empty list restores the fallback that considers
+    * all registered patch data.
+    */
+   void
+   setLinearLoadPatchDataIndices(
+      const std::vector<int>& data_ids);
+
+   /*!
     * @brief Configure the load balancer to use the data stored
     * in the hierarchy at the specified descriptor index
     * for estimating the workload on each cell.
@@ -336,6 +360,11 @@ private:
     */
    LoadType
    computeLocalLoad(
+      const hier::BoxLevel& box_level,
+      bool apply_load_model = true) const;
+
+   LoadType
+   computeLocalZones(
       const hier::BoxLevel& box_level) const;
 
    /*
@@ -346,13 +375,31 @@ private:
       const hier::PatchLevel& patch_level) const;
 
    /*!
+    * @brief Compute the geometric width corresponding to the ideal load.
+    */
+   double
+   computeIdealBoxWidth() const;
+
+   /*!
+    * @brief Re-run cascade partitioning until post-split linear load
+    * converges.  For non-linear loading, this performs one cascade pass.
+    */
+   void
+   partitionByCascadeIteratively(
+      hier::BoxLevel& balance_box_level,
+      hier::Connector* balance_to_reference,
+      bool use_vouchers,
+      const tbox::RankGroup& rank_group) const;
+
+   /*!
     * *@brief Implements the cascade partitioner algorithm.
     */
    void
    partitionByCascade(
       hier::BoxLevel& balance_box_level,
       hier::Connector* balance_to_reference,
-      bool use_vouchers = false) const;
+      bool use_vouchers = false,
+      bool allow_box_breaking = true) const;
 
    /*!
     * @brief Update Connectors balance_box_level<==>reference.
@@ -417,6 +464,52 @@ private:
     * Set to 1 when not restricting.
     */
    hier::IntVector d_tile_size;
+
+   /*!
+    * @brief Per-level flags for using the linear load model.
+    *
+    * If fewer values are provided than hierarchy levels, the last
+    * value is used for all finer levels.
+    *
+    * See input parameter "using_linear_load".
+    */
+   std::vector<bool> d_using_linear_load;
+
+   /*!
+    * @brief Per-level slopes for the linear load model.
+    *
+    * If fewer values are provided than hierarchy levels, the last
+    * value is used for all finer levels.
+    *
+    * See input parameter "linear_load_slope".
+    */
+   std::vector<double> d_linear_load_slope;
+
+   /*!
+    * @brief Per-level intercepts for the linear load model.
+    *
+    * If fewer values are provided than hierarchy levels, the last
+    * value is used for all finer levels.
+    *
+    * See input parameter "linear_load_intercept".
+    */
+   std::vector<double> d_linear_load_intercept;
+
+   /*!
+    * @brief Application patch data used to derive the linear-load ghost
+    * width. An empty list means all registered patch data.
+    */
+   std::vector<int> d_linear_load_data_ids;
+
+   /*!
+    * @brief Maximum number of split-producing linear-load passes.
+    *
+    * The default value of one performs one split-producing pass followed by
+    * a no-breaking correction pass.  Values greater than one request
+    * additional convergence passes.  The correction pass is not included in
+    * this limit.
+    */
+   int d_max_linear_load_iterations;
 
    /*!
     * @brief Max number of processes the a single process may spread

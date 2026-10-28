@@ -160,7 +160,8 @@ private:
 
       //! @brief Compute load that would break off if the box is broken off.
       double computeBreakOffLoad(
-         const hier::Box& box);
+         const hier::Box& box,
+         const hier::BoxContainer* precomputed_leftover = 0);
 
       void
       swapWithReversedTrial(
