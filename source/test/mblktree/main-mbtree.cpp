@@ -17,7 +17,7 @@
 #include "SAMRAI/tbox/BalancedDepthFirstTree.h"
 #include "SAMRAI/tbox/InputDatabase.h"
 #include "SAMRAI/tbox/InputManager.h"
-#include "SAMRAI/tbox/HDFDatabase.h"
+#include "test/testlib/BaselineData.h"
 #include "SAMRAI/tbox/SAMRAIManager.h"
 #include "SAMRAI/tbox/SAMRAI_MPI.h"
 #include "SAMRAI/tbox/TimerManager.h"
@@ -85,7 +85,6 @@ int main(
    }
 
    int fail_count = 0;
-#ifdef HAVE_HDF5
    {
 
       /*
@@ -170,23 +169,23 @@ int main(
 
       const std::string baseline_dirname = main_db->getString("baseline_dirname");
       const std::string baseline_filename = baseline_dirname + "/" + base_name + ".baselinedb";
-      tbox::HDFDatabase basline_db(baseline_filename);
-
       const bool generate_baseline =
          main_db->getBoolWithDefault("generate_baseline", false);
 
-      std::shared_ptr<tbox::HDFDatabase> baseline_db(
-         new tbox::HDFDatabase("mbtree baseline"));
+      testlib::BaselineData baseline_data("mbtree baseline");
       std::shared_ptr<tbox::Database> box_level_db;
       std::shared_ptr<tbox::Database> connector_db;
       if (generate_baseline) {
-         baseline_db->create(baseline_filename);
-         box_level_db = baseline_db->putDatabase("MappedBoxLevel");
-         connector_db = baseline_db->putDatabase("Connector");
+         baseline_data.create(baseline_filename);
+         box_level_db = baseline_data.getDatabase()->putDatabase("MappedBoxLevel");
+         connector_db = baseline_data.getDatabase()->putDatabase("Connector");
       } else {
-         baseline_db->open(baseline_filename);
-         box_level_db = baseline_db->getDatabase("MappedBoxLevel");
-         connector_db = baseline_db->getDatabase("Connector");
+         if (!baseline_data.open(baseline_filename)) {
+            TBOX_ERROR("Could not open baseline " << baseline_filename
+               << ".baseline.\n");
+         }
+         box_level_db = baseline_data.getDatabase()->getDatabase("MappedBoxLevel");
+         connector_db = baseline_data.getDatabase()->getDatabase("Connector");
       }
 
       /*
@@ -400,7 +399,6 @@ int main(
       tbox::plog << "\nShutting down..." << std::endl;
 
    }
-#endif
 
    if (fail_count == 0) {
       tbox::pout << "\nPASSED:  Multiblock tree search" << std::endl;

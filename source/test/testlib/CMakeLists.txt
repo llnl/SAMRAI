@@ -1,5 +1,6 @@
 set (testlib_headers
   AutoTester.h
+  BaselineData.h
   DerivedVisOwnerData.h
   GeomUtilsAMR.h
   get-input-filename.h
@@ -14,6 +15,7 @@ set (testlib_headers
 
 set (testlib_sources
   AutoTester.cpp
+  BaselineData.cpp
   DerivedVisOwnerData.cpp
   MblkHyperbolicLevelIntegrator.cpp
   MblkHyperbolicPatchStrategy.cpp

@@ -18,7 +18,7 @@
 #include "SAMRAI/algs/HyperbolicLevelIntegrator.h"
 #include "SAMRAI/algs/MethodOfLinesIntegrator.h"
 #include "SAMRAI/hier/PatchHierarchy.h"
-#include "SAMRAI/tbox/HDFDatabase.h"
+#include "BaselineData.h"
 #include "SAMRAI/tbox/Utilities.h"
 #include "SAMRAI/algs/TimeRefinementIntegrator.h"
 
@@ -133,7 +133,6 @@ private:
    //!@brief Whether to read file of boxes for regression check.
    bool d_read_patch_boxes;
 
-#ifdef HAVE_HDF5
    /*!
     * @brief Database containing correct results for the
     * BoxLevels generated, for comparison check.
@@ -142,8 +141,7 @@ private:
     * for the BoxLevel level number LN at the sequence number
     * SN.
     */
-   tbox::HDFDatabase d_hdf_db;
-#endif
+   testlib::BaselineData d_baseline_data;
 
 };
 

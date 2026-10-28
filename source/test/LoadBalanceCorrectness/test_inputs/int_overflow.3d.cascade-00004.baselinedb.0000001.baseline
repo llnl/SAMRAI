@@ -1,0 +1,30 @@
+// Generated SAMRAI regression baseline.
+postbalance_BoxLevel_0 {
+   HIER_MAPPED_BOX_LEVEL_VERSION = 0
+   d_is_mapped_box_level = TRUE
+   d_nproc = 4
+   d_rank = 1
+   d_ratio_0 = 1, 1, 1
+   dim = 3
+   mapped_boxes {
+      HIER_BOX_CONTAINER_VERSION = 0
+      block_ids = 0
+      boxes = [(0,0,1024),(1023,2048,2048)]
+      local_indices = 0
+      mapped_box_set_size = 1
+      periodic_ids = 0
+      ranks = 1
+   }
+}
+prebalance_BoxLevel_0 {
+   HIER_MAPPED_BOX_LEVEL_VERSION = 0
+   d_is_mapped_box_level = TRUE
+   d_nproc = 4
+   d_rank = 1
+   d_ratio_0 = 1, 1, 1
+   dim = 3
+   mapped_boxes {
+      HIER_BOX_CONTAINER_VERSION = 0
+      mapped_box_set_size = 0
+   }
+}
