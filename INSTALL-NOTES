@@ -1,5 +1,5 @@
 ****************************************************************************
-*  Copyright 1997-2025                                                     *
+*  Copyright 1997-2026                                                     *
 *  Lawrence Livermore National Security, LLC.                            *
 *  All rights reserved.                                                    *
 ****************************************************************************
@@ -294,9 +294,9 @@ doxygen	        1.6.1
 
 graphviz	2.26
 
-Umpire          v2025.09.0
+Umpire          v2026.07.1
 
-RAJA            v2025.09.0
+RAJA            v2026.07.0
 
 
 Visualization Tools:

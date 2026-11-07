@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Factory abstract base class for creating patch data objects
  *
  ************************************************************************/
@@ -84,7 +84,7 @@ public:
     * @brief Virtual destructor for the patch data factory class.
     *
     */
-   virtual ~PatchDataFactory();
+   virtual ~PatchDataFactory() = default;
 
    /**
     * @brief Abstract virtual function to clone a patch data factory.
@@ -194,12 +194,11 @@ protected:
 
 private:
    PatchDataFactory(
-      const PatchDataFactory&);               // not implemented
+      const PatchDataFactory&) = delete;
    PatchDataFactory&
    operator = (
-      const PatchDataFactory&);               // not implemented
-   PatchDataFactory();                             // not implemented,
-                                                   // must specify ghost width
+      const PatchDataFactory&) = delete;
+   PatchDataFactory() = delete;  // must specify ghost width
 
 };
 

@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   hier
  *
  ************************************************************************/
@@ -16,6 +16,8 @@
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/Index.h"
 #include "SAMRAI/tbox/Utilities.h"
+
+#include <type_traits>
 
 namespace SAMRAI {
 namespace pdat {
@@ -86,6 +88,36 @@ public:
       return *this;
    }
 
+   /*!
+    * @brief Plus-equals operator for a cell index and hier::Index.
+    *
+    * The rhs could be hier::Index or CellIndex.  A deleted template overload
+    * disallows any other derived Index types to be uses as the rhs.
+    *
+    * @pre getDim() == rhs.getDim()
+    */
+   CellIndex&
+   operator += (
+      const hier::Index& rhs)
+   {
+      TBOX_ASSERT_OBJDIM_EQUALITY2(*this, rhs);
+      hier::Index::operator += (rhs);
+      return *this;
+   }
+
+   /*!
+    * Deleted template overload to restrict rhs to Index or CellIndex.
+    */
+   template <class T,
+      typename std::enable_if<
+         std::is_base_of<hier::Index, T>::value &&
+         !std::is_same<T, hier::Index>::value &&
+         !std::is_same<T, CellIndex>::value,
+         int>::type = 0>
+   CellIndex&
+   operator += (
+      const T&) = delete;
+
    /**
     * Plus operator for a cell index and an integer vector.
     *
@@ -100,6 +132,37 @@ public:
       tmp += rhs;
       return tmp;
    }
+
+   /*!
+    * @brief Plus operator for a cell index and hier::Index.
+    *
+    * The rhs could be hier::Index or CellIndex.  A deleted template overload
+    * disallows any other derived Index types to be uses as the rhs.
+    *
+    * @pre getDim() == rhs.getDim()
+    */
+   CellIndex
+   operator + (
+      const hier::Index& rhs) const
+   {
+      TBOX_ASSERT_OBJDIM_EQUALITY2(*this, rhs);
+      CellIndex tmp = *this;
+      tmp += rhs;
+      return tmp;
+   }
+
+   /*!
+    * Deleted template overload to restrict rhs to Index or CellIndex.
+    */
+   template <class T,
+      typename std::enable_if<
+         std::is_base_of<hier::Index, T>::value &&
+         !std::is_same<T, hier::Index>::value &&
+         !std::is_same<T, CellIndex>::value,
+         int>::type = 0>
+   CellIndex
+   operator + (
+      const T&) const = delete;
 
    /**
     * Plus-equals operator for a cell index and an integer.
@@ -152,6 +215,67 @@ public:
       tmp -= rhs;
       return tmp;
    }
+
+   /*!
+    * @brief Minus-equals operator for a cell index and hier::Index.
+    *
+    * The rhs could be hier::Index or CellIndex.  A deleted template overload
+    * disallows any other derived Index types to be uses as the rhs.
+    *
+    * @pre getDim() == rhs.getDim()
+    */
+   CellIndex&
+   operator -= (
+      const hier::Index& rhs)
+   {
+      TBOX_ASSERT_OBJDIM_EQUALITY2(*this, rhs);
+      hier::Index::operator -= (rhs);
+      return *this;
+   }
+
+   /*!
+    * Deleted template overload to restrict rhs to Index or CellIndex.
+    */
+   template <class T,
+      typename std::enable_if<
+         std::is_base_of<hier::Index, T>::value &&
+         !std::is_same<T, hier::Index>::value &&
+         !std::is_same<T, CellIndex>::value,
+         int>::type = 0>
+   CellIndex&
+   operator -= (
+      const T&) = delete;
+
+   /*!
+    * @brief Minus-equals operator for a cell index and hier::Index.
+    *
+    * The rhs could be hier::Index or CellIndex.  A deleted template overload
+    * disallows any other derived Index types to be uses as the rhs.
+    *
+    * @pre getDim() == rhs.getDim()
+    */
+   CellIndex
+   operator - (
+      const hier::Index& rhs) const
+   {
+      TBOX_ASSERT_OBJDIM_EQUALITY2(*this, rhs);
+      CellIndex tmp = *this;
+      tmp -= rhs;
+      return tmp;
+   }
+
+   /*!
+    * Deleted template overload to restrict rhs to Index or CellIndex.
+    */
+   template <class T,
+      typename std::enable_if<
+         std::is_base_of<hier::Index, T>::value &&
+         !std::is_same<T, hier::Index>::value &&
+         !std::is_same<T, CellIndex>::value,
+         int>::type = 0>
+   CellIndex
+   operator - (
+      const T&) const = delete;
 
    /**
     * Minus-equals operator for a cell index and an integer.

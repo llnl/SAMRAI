@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Box representing a portion of the AMR index space
  *
  ************************************************************************/
@@ -14,8 +14,8 @@
 namespace SAMRAI {
 namespace hier {
 
-Box * Box::s_emptys[SAMRAI::MAX_DIM_VAL];
-Box * Box::s_universes[SAMRAI::MAX_DIM_VAL];
+std::array<std::optional<Box>, SAMRAI::MAX_DIM_VAL> Box::s_emptys{};
+std::array<std::optional<Box>, SAMRAI::MAX_DIM_VAL> Box::s_universes{};
 
 tbox::StartupShutdownManager::Handler
 Box::s_initialize_finalize_handler(
@@ -657,28 +657,6 @@ Box::refine(
 /*
  *************************************************************************
  *
- * Return the direction of the box that is the longest.
- *
- *************************************************************************
- */
-
-Box::dir_t
-Box::longestDirection() const
-{
-   int max = upper(0) - lower(0);
-   dir_t dim = 0;
-
-   for (dir_t i = 1; i < getDim().getValue(); ++i)
-      if ((upper(i) - lower(i)) > max) {
-         max = upper(i) - lower(i);
-         dim = i;
-      }
-   return dim;
-}
-
-/*
- *************************************************************************
- *
  * Type Conversions
  *
  *************************************************************************
@@ -1094,13 +1072,13 @@ Box::initializeCallback()
 {
    for (unsigned short d = 0; d < SAMRAI::MAX_DIM_VAL; ++d) {
       tbox::Dimension dim(static_cast<unsigned short>(d + 1));
-      s_emptys[d] = new Box(dim);
+      s_emptys[d].emplace(dim);
 
       /*
        * Note we can't use Index getMin, getMax here as that
        * would create a dependency between static initializers
        */
-      s_universes[d] = new Box(
+      s_universes[d].emplace(
             Index(dim, tbox::MathUtilities<int>::getMin()),
             Index(dim, tbox::MathUtilities<int>::getMax()),
             BlockId(0));
@@ -1115,8 +1093,8 @@ void
 Box::finalizeCallback()
 {
    for (int d = 0; d < SAMRAI::MAX_DIM_VAL; ++d) {
-      delete s_emptys[d];
-      delete s_universes[d];
+      s_emptys[d].reset();
+      s_universes[d].reset();
    }
 }
 
@@ -1150,17 +1128,6 @@ BoxIterator::BoxIterator(
       d_index(d_box.getDim().getValue() - 1) =
          d_box.upper(static_cast<tbox::Dimension::dir_t>(d_box.getDim().getValue() - 1)) + 1;
    }
-}
-
-BoxIterator::BoxIterator(
-   const BoxIterator& iter):
-   d_index(iter.d_index),
-   d_box(iter.d_box)
-{
-}
-
-BoxIterator::~BoxIterator()
-{
 }
 
 }

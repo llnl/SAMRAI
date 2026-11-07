@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Base class that describes intersections between AMR boxes
  *
  ************************************************************************/
@@ -47,12 +47,12 @@ public:
    /*!
     * @brief The default constructor for BoxOverlap.
     */
-   BoxOverlap();
+   BoxOverlap() = default;
 
    /*!
     * @brief The virtual destructor.
     */
-   virtual ~BoxOverlap();
+   virtual ~BoxOverlap() = default;
 
    /*!
     * @brief Return true if overlap object represents an empty data
@@ -101,10 +101,10 @@ public:
 
 private:
    BoxOverlap(
-      const BoxOverlap&);               // not implemented
+      const BoxOverlap&) = delete;
    BoxOverlap&
    operator = (
-      const BoxOverlap&);               // not implemented
+      const BoxOverlap&) = delete;
 
 };
 

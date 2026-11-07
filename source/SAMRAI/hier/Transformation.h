@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Class for managing tanssformations between index spaces in
  *                an AMR hierarchy.
  *
@@ -135,18 +135,20 @@ public:
     * @param[in] copy_trans
     */
    Transformation(
-      const Transformation& copy_trans);
+      const Transformation& copy_trans) = default;
+
+   Transformation(Transformation&& other) = default;
 
    /*!
     * @brief Destructor
     */
-   ~Transformation();
+   ~Transformation() = default;
 
    /*!
     * @brief Get the rotation
     */
-   RotationIdentifier
-   getRotation() const
+   constexpr RotationIdentifier
+   getRotation() const noexcept
    {
       return d_rotation;
    }
@@ -155,7 +157,7 @@ public:
     * @brief Get the offset
     */
    const IntVector&
-   getOffset() const
+   getOffset() const noexcept
    {
       return d_offset;
    }
@@ -199,19 +201,17 @@ public:
     */
    Transformation&
    operator = (
-      const Transformation& rhs)
-   {
-      d_rotation = rhs.d_rotation;
-      d_offset = rhs.d_offset;
-      d_begin_block = rhs.d_begin_block;
-      d_end_block = rhs.d_end_block;
-      return *this;
-   }
+      const Transformation& rhs) = default;
+
+   Transformation&
+   operator = (
+      Transformation&& rhs) = default;
 
    /*!
     * @brief Get the BlockId for the Box before transformation.
     */
-   const BlockId& getBeginBlock() const
+   constexpr const BlockId&
+   getBeginBlock() const noexcept
    {
       return d_begin_block;
    }
@@ -219,7 +219,8 @@ public:
    /*!
     * @brief Get the BlockId for the Box after transformation.
     */
-   const BlockId& getEndBlock() const
+   constexpr const BlockId&
+   getEndBlock() const noexcept
    {
       return d_end_block;
    }
@@ -367,7 +368,7 @@ private:
    /*
     * Unimplemented default constructor.
     */
-   Transformation();
+   Transformation() = delete;
 
    RotationIdentifier d_rotation;
    IntVector d_offset;

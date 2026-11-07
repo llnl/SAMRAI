@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Patch container class for patch data objects
  *
  ************************************************************************/
@@ -77,7 +77,7 @@ public:
    /*!
     * @brief Virtual destructor for patch objects.
     */
-   virtual ~Patch();
+   virtual ~Patch() = default;
 
    /*!
     * @brief Get the box over which the patch is defined.

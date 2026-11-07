@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   BlueprintUtilsStrategy
  *
  ************************************************************************/
@@ -16,6 +16,7 @@
 #include "SAMRAI/tbox/Database.h"
 
 #include <memory>
+#include <string>
 
 namespace SAMRAI {
 namespace hier {
@@ -36,12 +37,12 @@ public:
    /*!
     * @brief Constructor
     */
-   BlueprintUtilsStrategy();
+   BlueprintUtilsStrategy() = default;
 
    /*!
     * @brief Destructor
     */
-   virtual ~BlueprintUtilsStrategy();
+   virtual ~BlueprintUtilsStrategy() = default;
 
    /*!
     * @brief Put blueprint coordinate information into a database
@@ -61,6 +62,39 @@ public:
       std::shared_ptr<tbox::Database>& coords_db,
       const Patch& patch,
       const Box& box) = 0;
+
+   /*!
+    * @brief Put blueprint field data into a domain database
+    *
+    * This virtual function provides an interface to call into application
+    * code to add field data to a domain that is part of a blueprint
+    * mesh, according to the blueprints format for fields.
+    *
+    * The default no-op implementation allows for meshes to be created with
+    * no fields.
+    *
+    * @param domain_db   Database for the blueprint mesh domain.  The domain
+    *                    should represent the spatial intersection of the
+    *                    patch and box arguments
+    * @param patch       Patch holding the data.
+    * @param box         Only data existing on the intersection of this
+    *                    box and the patch's box should be added to the
+    *                    domain database
+    * @param topology_name   Name of the topology to be associated with the
+    *                        fields
+    *
+    */
+   virtual void putFieldsToDomainDatabase(
+      std::shared_ptr<tbox::Database>& domain_db,
+      const Patch& patch,
+      const Box& box,
+      const std::string& topology_name)
+   {
+      NULL_USE(domain_db);
+      NULL_USE(patch);
+      NULL_USE(box);
+      NULL_USE(topology_name);
+   }
 
 private:
 

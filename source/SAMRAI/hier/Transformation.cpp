@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Class for managing transformations between index spaces in
  *                an AMR hierarchy.
  *
@@ -43,27 +43,6 @@ Transformation::Transformation(
    d_offset(src_offset),
    d_begin_block(BlockId::invalidId()),
    d_end_block(BlockId::invalidId())
-{
-}
-
-Transformation::Transformation(
-   const Transformation& copy_trans):
-   d_rotation(copy_trans.d_rotation),
-   d_offset(copy_trans.d_offset),
-   d_begin_block(copy_trans.d_begin_block),
-   d_end_block(copy_trans.d_end_block)
-{
-}
-
-/*
- * ************************************************************************
- *
- * Destructor
- *
- * ************************************************************************
- */
-
-Transformation::~Transformation()
 {
 }
 

@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Blueprint utilities
  *
  ************************************************************************/
@@ -20,7 +20,7 @@ namespace SAMRAI {
 namespace hier {
 
 /*
- * Constructor does nothing because the objects are stateless.
+ * Constructor and destructor
  */
 
 BlueprintUtils::BlueprintUtils(BlueprintUtilsStrategy* strategy)
@@ -28,9 +28,6 @@ BlueprintUtils::BlueprintUtils(BlueprintUtilsStrategy* strategy)
 {
 }
 
-BlueprintUtils::~BlueprintUtils()
-{
-}
 
 /*
  ***************************************************************************
@@ -145,6 +142,44 @@ void BlueprintUtils::putTopologyAndCoordinatesToDatabase(
             topo_db->putString("type", "structured");
          } else {
             topo_db->putString("type", coords_type);
+         }
+      }
+   }
+}
+
+void BlueprintUtils::putFieldsToDatabase(
+   const std::shared_ptr<tbox::Database>& blueprint_db,
+   const PatchHierarchy& hierarchy,
+   const FlattenedHierarchy& flat_hierarchy,
+   const std::string& topology_name) const
+{
+   TBOX_ASSERT(blueprint_db);
+
+   for (int i = 0; i < hierarchy.getNumberOfLevels(); ++i) {
+      const std::shared_ptr<PatchLevel>& level(
+         hierarchy.getPatchLevel(i));
+
+      for (PatchLevel::Iterator p(level->begin()); p != level->end();
+           ++p) {
+
+         const std::shared_ptr<Patch>& patch = *p;
+         const Box& patch_box = patch->getBox();
+
+         const auto& flat_boxes = flat_hierarchy.getVisibleBoxes(patch_box, i);
+
+         for (const auto& domain_box : flat_boxes) {
+            int domain_id = domain_box.getLocalId().getValue();
+            std::string domain_name =
+               "domain_" + tbox::Utilities::intToString(domain_id, 6);
+
+            if (d_strategy && blueprint_db->isDatabase(domain_name)) {
+
+               std::shared_ptr<tbox::Database> domain_db(
+                  blueprint_db->getDatabase(domain_name));
+
+               d_strategy->putFieldsToDomainDatabase(
+                  domain_db, *patch, domain_box, topology_name);
+            }
          }
       }
    }

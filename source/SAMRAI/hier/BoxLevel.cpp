@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Set of boxes in a box_level of a distributed box graph.
  *
  ************************************************************************/
@@ -78,8 +78,8 @@ BoxLevel::BoxLevel(
    d_global_data_up_to_date(false),
 
    d_parallel_state(DISTRIBUTED),
-   d_globalized_version(0),
-   d_persistent_overlap_connectors(0),
+   d_globalized_version(nullptr),
+   d_persistent_overlap_connectors(nullptr),
    d_handle(),
    d_grid_geometry(),
    d_locked(false)
@@ -115,8 +115,8 @@ BoxLevel::BoxLevel(
    d_global_data_up_to_date(rhs.d_global_data_up_to_date),
 
    d_parallel_state(rhs.d_parallel_state),
-   d_globalized_version(0),
-   d_persistent_overlap_connectors(0),
+   d_globalized_version(nullptr),
+   d_persistent_overlap_connectors(nullptr),
    d_handle(),
    d_grid_geometry(rhs.d_grid_geometry),
    d_locked(false)
@@ -153,8 +153,8 @@ BoxLevel::BoxLevel(
    d_global_data_up_to_date(false),
 
    d_parallel_state(DISTRIBUTED),
-   d_globalized_version(0),
-   d_persistent_overlap_connectors(0),
+   d_globalized_version(nullptr),
+   d_persistent_overlap_connectors(nullptr),
    d_handle(),
    d_grid_geometry(),
    d_locked(false)
@@ -192,8 +192,8 @@ BoxLevel::BoxLevel(
    d_global_data_up_to_date(false),
 
    d_parallel_state(DISTRIBUTED),
-   d_globalized_version(0),
-   d_persistent_overlap_connectors(0),
+   d_globalized_version(nullptr),
+   d_persistent_overlap_connectors(nullptr),
    d_handle(),
    d_grid_geometry(),
    d_locked(false)
@@ -205,10 +205,7 @@ BoxLevel::~BoxLevel()
 {
    d_locked = false;
    clear();
-   if (d_persistent_overlap_connectors != 0) {
-      delete d_persistent_overlap_connectors;
-      d_persistent_overlap_connectors = 0;
-   }
+   d_persistent_overlap_connectors.reset();
 }
 
 /*
@@ -529,7 +526,7 @@ BoxLevel::swap(
       bool tmpbool;
       Box tmpbox(level_a.getDim());
       ParallelState tmpstate;
-      const BoxLevel* tmpmbl;
+      std::unique_ptr<const BoxLevel> tmpmbl;
       tbox::SAMRAI_MPI tmpmpi(MPI_COMM_NULL);
       std::shared_ptr<const BaseGridGeometry> tmpgridgeom(
          level_a.getGridGeometry());
@@ -570,9 +567,9 @@ BoxLevel::swap(
       level_a.d_global_data_up_to_date = level_b.d_global_data_up_to_date;
       level_b.d_global_data_up_to_date = tmpbool;
 
-      tmpmbl = level_a.d_globalized_version;
-      level_a.d_globalized_version = level_b.d_globalized_version;
-      level_b.d_globalized_version = tmpmbl;
+      tmpmbl = std::move(level_a.d_globalized_version);
+      level_a.d_globalized_version = std::move(level_b.d_globalized_version);
+      level_b.d_globalized_version = std::move(tmpmbl);
 
       level_a.d_grid_geometry = level_b.d_grid_geometry;
       level_b.d_grid_geometry = tmpgridgeom;
@@ -1330,12 +1327,11 @@ BoxLevel::getGlobalizedVersion() const
       return *this;
    }
 
-   if (d_globalized_version == 0) {
-      BoxLevel* globalized_version = new BoxLevel(*this);
+   if (!d_globalized_version) {
+      auto globalized_version = std::make_unique<BoxLevel>(*this);
       globalized_version->setParallelState(GLOBALIZED);
       TBOX_ASSERT(globalized_version->getParallelState() == GLOBALIZED);
-      d_globalized_version = globalized_version;
-      globalized_version = 0;
+      d_globalized_version = std::move(globalized_version);
    }
 
    TBOX_ASSERT(d_globalized_version->getParallelState() == GLOBALIZED);
@@ -1349,8 +1345,8 @@ BoxLevel::getGlobalizedVersion() const
 PersistentOverlapConnectors&
 BoxLevel::getPersistentOverlapConnectors() const
 {
-   if (d_persistent_overlap_connectors == 0) {
-      d_persistent_overlap_connectors = new PersistentOverlapConnectors(*this);
+   if (!d_persistent_overlap_connectors) {
+      d_persistent_overlap_connectors.reset(new PersistentOverlapConnectors(*this));
    }
    return *d_persistent_overlap_connectors;
 }

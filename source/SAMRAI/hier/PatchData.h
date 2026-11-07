@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Abstract base class for patch data objects
  *
  ************************************************************************/
@@ -71,7 +71,7 @@ public:
    /**
     * The virtual destructor for a patch data object.
     */
-   virtual ~PatchData();
+   virtual ~PatchData() = default;
 
    /**
     * Return the box over which this patch data object is defined.  All
@@ -311,10 +311,10 @@ private:
    static const int HIER_PATCH_DATA_VERSION;
 
    PatchData(
-      const PatchData&);        // not implemented
+      const PatchData&) = delete;
    PatchData&
    operator = (
-      const PatchData&);                // not implemented
+      const PatchData&) = delete;
 
    Box d_box;                           // interior box description
    Box d_ghost_box;                     // interior box plus ghosts

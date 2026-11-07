@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   tbox
  *
  ************************************************************************/
@@ -62,7 +62,7 @@ public:
    /**
     * The destructor simply releases the storage for the mapping.
     */
-   ~ProcessorMapping();
+   ~ProcessorMapping() = default;
 
    /**
     * Resize the mapping so that it has n elements.  Before it can be
@@ -188,7 +188,7 @@ private:
 
    ProcessorMapping&
    operator = (
-      const ProcessorMapping&);                 // not implemented
+      const ProcessorMapping&) = delete;
 
    int d_my_rank;
    int d_nodes;

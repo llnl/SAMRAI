@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Manager class for variables used in a SAMRAI application.
  *
  ************************************************************************/
@@ -93,10 +93,6 @@ VariableDatabase::VariableDatabase():
    d_num_registered_patch_data_ids = 0;
 
    d_internal_SAMRAI_context = getContext("Internal_SAMRAI_Variable");
-}
-
-VariableDatabase::~VariableDatabase()
-{
 }
 
 void

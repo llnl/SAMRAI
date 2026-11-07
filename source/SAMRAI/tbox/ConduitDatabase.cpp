@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   An memory database structure that stores (key,value) pairs in memory
  *
  ************************************************************************/
@@ -350,7 +350,7 @@ ConduitDatabase::getBoolVector(
       TBOX_CONDUIT_DB_ERROR("Key=" << key << " is not a boolean...");
    }
    conduit::uint8_array int_vals = child["data"].as_uint8_array();
-   unsigned int vec_size = child.dtype().number_of_elements();
+   unsigned int vec_size = child["data"].dtype().number_of_elements();
    std::vector<bool> bool_vec(vec_size, false);
    for (unsigned int i = 0; i < vec_size; ++i) {
       if (int_vals[i] != 0) {

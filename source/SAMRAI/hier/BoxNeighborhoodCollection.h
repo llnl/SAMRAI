@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   A class describing the adjacency of Boxes.
  *
  ************************************************************************/
@@ -78,27 +78,17 @@ private:
       }
    };
 
-   // Typedefs.
-
-   typedef std::set<BoxId, box_id_less> BaseBoxPool;
-
-   typedef BaseBoxPool::iterator BaseBoxPoolItr;
-
-   typedef std::set<Box, box_less> HeadBoxPool;
-
-   typedef std::map<const Box *, int, box_ptr_less> HeadBoxLinkCt;
-
-   typedef std::set<const Box *, box_ptr_less> Neighborhood;
-
-   typedef Neighborhood::iterator NeighborhoodItr;
-
-   typedef Neighborhood::const_iterator NeighborhoodConstItr;
-
-   typedef std::map<const BoxId *, Neighborhood, box_id_ptr_less> AdjList;
-
-   typedef AdjList::iterator AdjListItr;
-
-   typedef AdjList::const_iterator AdjListConstItr;
+   // type aliases
+   using BaseBoxPool = std::set<BoxId, box_id_less>;
+   using BaseBoxPoolItr = BaseBoxPool::iterator;
+   using HeadBoxPool = std::set<Box, box_less>;
+   using HeadBoxLinkCt = std::map<const Box*, int, box_ptr_less>;
+   using Neighborhood = std::set<const Box*, box_ptr_less>;
+   using NeighborhoodItr = Neighborhood::iterator;
+   using NeighborhoodConstItr = Neighborhood::const_iterator;
+   using AdjList = std::map<const BoxId*, Neighborhood, box_id_ptr_less>;
+   using AdjListItr = AdjList::iterator;
+   using AdjListConstItr = AdjList::const_iterator;
 
    /*
     * Static integer constant describing class's version number.
@@ -136,7 +126,7 @@ public:
     * @brief Constructs an empty object. There are not yet any base Boxes
     * whose neighborhoods are represented by this object.
     */
-   BoxNeighborhoodCollection();
+   BoxNeighborhoodCollection() = default;
 
    /*!
     * @brief Constructs a collection of empty neighborhoods for each base
@@ -170,7 +160,7 @@ public:
    /*!
     * @brief Destructor
     */
-   ~BoxNeighborhoodCollection();
+   ~BoxNeighborhoodCollection() = default;
 
    // Operators
 
@@ -229,8 +219,7 @@ public:
        *
        * @param other
        */
-      ConstIterator(
-         const ConstIterator& other);
+      ConstIterator(const ConstIterator& other) = default;
 
       /*!
        * @brief Copy constructor.
@@ -275,7 +264,7 @@ public:
       /*!
        * @brief Performs necessary deletion.
        */
-      ~ConstIterator();
+      ~ConstIterator() = default;
 
       // Operators
 
@@ -413,8 +402,7 @@ public:
        *
        * @param other
        */
-      Iterator(
-         const Iterator& other);
+      Iterator(const Iterator& other) = default;
 
       /*!
        * @brief Assignment operator.
@@ -436,7 +424,7 @@ public:
       /*!
        * @brief Performs necessary deletion.
        */
-      ~Iterator();
+      ~Iterator() = default;
 
       // Operators
 
@@ -578,8 +566,7 @@ public:
        *
        * @param other
        */
-      ConstNeighborIterator(
-         const ConstNeighborIterator& other);
+      ConstNeighborIterator(const ConstNeighborIterator& other) = default;
 
       /*!
        * @brief Copy constructor.
@@ -624,7 +611,7 @@ public:
       /*!
        * @brief Performs necessary deletion.
        */
-      ~ConstNeighborIterator();
+      ~ConstNeighborIterator() = default;
 
       // Operators
 
@@ -745,8 +732,7 @@ public:
        *
        * @param other
        */
-      NeighborIterator(
-         const NeighborIterator& other);
+      NeighborIterator(const NeighborIterator& other) = default;
 
       /*!
        * @brief Assignment operator.
@@ -768,7 +754,7 @@ public:
       /*!
        * @brief Performs necessary deletion.
        */
-      ~NeighborIterator();
+      ~NeighborIterator() = default;
 
       // Operators
 

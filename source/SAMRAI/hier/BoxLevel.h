@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Set of Boxes in the same "level".
  *
  ************************************************************************/
@@ -383,10 +383,9 @@ public:
    void
    deallocateGlobalizedVersion() const
    {
-      if (d_globalized_version != 0) {
+      if (d_globalized_version) {
          TBOX_ASSERT(d_globalized_version->getParallelState() == GLOBALIZED);
-         delete d_globalized_version;
-         d_globalized_version = 0;
+         d_globalized_version.reset();
       }
    }
 
@@ -883,10 +882,7 @@ public:
       const IntVector& final_ratio) const
    {
       finer.detachMyHandle();
-      if (finer.d_globalized_version) {
-         delete finer.d_globalized_version;
-         finer.d_globalized_version = 0;
-      }
+      finer.d_globalized_version.reset();
       finer.d_boxes = d_boxes;
       finer.d_boxes.refine(ratio);
       finer.d_parallel_state = d_parallel_state;
@@ -913,10 +909,7 @@ public:
       const IntVector& final_ratio) const
    {
       coarser.detachMyHandle();
-      if (coarser.d_globalized_version) {
-         delete coarser.d_globalized_version;
-         coarser.d_globalized_version = 0;
-      }
+      coarser.d_globalized_version.reset();
       coarser.d_boxes = d_boxes;
       coarser.d_boxes.coarsen(ratio);
       coarser.d_parallel_state = d_parallel_state;
@@ -1350,7 +1343,7 @@ public:
    void
    clearPersistentOverlapConnectors()
    {
-      if (d_persistent_overlap_connectors != 0) {
+      if (d_persistent_overlap_connectors) {
          d_persistent_overlap_connectors->clear();
       }
    }
@@ -2026,7 +2019,7 @@ private:
     * This is mutable because it is redundant data and gets
     * automatically set as needed.
     */
-   mutable BoxLevel const* d_globalized_version;
+   mutable std::unique_ptr<BoxLevel const> d_globalized_version;
 
    /*!
     * @brief Connectors managed by this BoxLevel,
@@ -2038,7 +2031,7 @@ private:
     * by always allocating the PersistentOverlapConnectors in the
     * constructor, but most BoxLevel won't need it at all.
     */
-   mutable PersistentOverlapConnectors* d_persistent_overlap_connectors;
+   mutable std::unique_ptr<PersistentOverlapConnectors> d_persistent_overlap_connectors;
 
    /*!
     * @brief A Handle for Connectors to reference this

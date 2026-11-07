@@ -74,7 +74,6 @@ set (hier_sources
   BaseGridGeometry.cpp
   BlockId.cpp
   BlueprintUtils.cpp
-  BlueprintUtilsStrategy.cpp
   BoundaryBox.cpp
   BoundaryBoxUtils.cpp
   BoundaryLookupTable.cpp

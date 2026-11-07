@@ -26,6 +26,18 @@
 
 # This can be ported to other compilers and/or platforms by changing
 # the hard-coded host-configs to others that define different configurations.
+# Check environment variables
+
+sys_type=${SYS_TYPE:-""}
+if [[ -z ${sys_type} ]]
+then
+    sys_type=${OSTYPE:-""}
+    if [[ -z ${sys_type} ]]
+    then
+        echo "System type not found (both SYS_TYPE and OSTYPE are undefined)"
+        exit 1
+    fi
+fi
 
 if [ $# -ne 2 ]; then
    >&2 echo "usage: /bin/sh ./build_tpl.sh [install directory path] [compiler-name]"
@@ -51,7 +63,11 @@ CAMP_SRC=$BASE_DIR/raja/tpl/camp
 RAJA_CONFIG=$BASE_DIR/$2-raja.cmake
 UMPIRE_CONFIG=$BASE_DIR/$2-umpire.cmake
 CAMP_CONFIG=$BASE_DIR/$2-camp.cmake
-cmake_cmd="/usr/tce/packages/cmake/cmake-3.23.1/bin/cmake"
+cmake_cmd="/usr/tce/packages/cmake/cmake-3.25.2/bin/cmake"
+if [[ "${sys_type}" == "toss_4_x86_64_ib_cray" ]]
+then
+    cmake_cmd="/usr/tce/packages/cmake/cmake-3.24.2/bin/cmake"
+fi
 
 if [ ! -f "$RAJA_CONFIG" ]; then
    >&2 echo "build_tpl.sh:  Unable to find file $RAJA_CONFIG"

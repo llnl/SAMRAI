@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Base class for application-level variables
  *
  ************************************************************************/
@@ -33,10 +33,6 @@ Variable::Variable(
    d_factory(factory)
 {
    d_instance = s_instance_counter++;
-}
-
-Variable::~Variable()
-{
 }
 
 }

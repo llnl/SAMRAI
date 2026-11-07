@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Multiblock binary trees of Boxes for overlap searches.
  *
  ************************************************************************/
@@ -44,7 +44,7 @@ public:
    /*!
     * @brief Destructor.
     */
-   ~MultiblockBoxTree();
+   ~MultiblockBoxTree() = default;
 
 private:
    /*!
@@ -69,7 +69,7 @@ private:
    /*!
     * Default constructor is unimplemented and should not be used.
     */
-   MultiblockBoxTree();
+   MultiblockBoxTree() = delete;
 
    /*!
     * @brief Return whether the tree contains any Boxes with the

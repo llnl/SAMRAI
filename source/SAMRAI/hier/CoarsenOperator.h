@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Abstract base class for spatial coarsening operators.
  *
  ************************************************************************/
@@ -141,10 +141,10 @@ public:
 
 private:
    CoarsenOperator(
-      const CoarsenOperator&);                  // not implemented
+      const CoarsenOperator&) = delete;
    CoarsenOperator&
    operator = (
-      const CoarsenOperator&);                  // not implemented
+      const CoarsenOperator&) = delete;
 
    /*
     * TODO SGS Rich has better way of doing this.

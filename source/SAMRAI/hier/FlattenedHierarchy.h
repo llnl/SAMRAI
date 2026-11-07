@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   A flattened representation of a hierarchy
  *
  ************************************************************************/
@@ -68,8 +68,8 @@ public:
 
    /*!
     * @brief Destructor
-    */ 
-   ~FlattenedHierarchy();
+    */
+   ~FlattenedHierarchy() = default;
 
    /*!
     * @brief Get the coarsest level number represented by this object
@@ -94,6 +94,12 @@ public:
     * is not covered by finer levels in the hierarchy.  If the entire
     * index space of the Box is covered by a finer level, the returned
     * BoxContainer will be empty.
+    *
+    * Each Box in the returned BoxContainer will have a BoxId that is unique
+    * across all visible boxes at all levels of resolution that can be returned
+    * by a FlattenedHierarchy object.  This differs from the usage of BoxId
+    * it PatchLevel or BoxLevel, where a BoxId is guaranteed to be unique only
+    * on one level, not across all levels.
     *
     * @param box  The Box for a local patch on the PatchLevel having
     *             level number ln.

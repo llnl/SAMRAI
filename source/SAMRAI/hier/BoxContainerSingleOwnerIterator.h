@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Special iterator for BoxContainer.
  *
  ************************************************************************/
@@ -36,28 +36,17 @@ public:
     * @brief Copy constructor
     */
    BoxContainerSingleOwnerIterator(
-      const BoxContainerSingleOwnerIterator& other):
-   d_boxes(other.d_boxes),
-   d_owner_rank(other.d_owner_rank),
-   d_iter(other.d_iter)
-   {
-   }
+      const BoxContainerSingleOwnerIterator& other) = default;
 
-   //! @brief Destructor
-   ~BoxContainerSingleOwnerIterator();
+   //! @brief Destructor.
+   ~BoxContainerSingleOwnerIterator() = default;
 
    /*!
     * @brief Assignment operator.
     */
    BoxContainerSingleOwnerIterator&
    operator = (
-      const BoxContainerSingleOwnerIterator& r)
-   {
-      d_boxes = r.d_boxes;
-      d_iter = r.d_iter;
-      d_owner_rank = r.d_owner_rank;
-      return *this;
-   }
+      const BoxContainerSingleOwnerIterator& r) = default;
 
    /*!
     * @brief Dereference operator mimicking a pointer dereference.

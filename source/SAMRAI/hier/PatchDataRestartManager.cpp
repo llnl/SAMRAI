@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   An restart manager singleton class
  *
  ************************************************************************/
@@ -48,30 +48,6 @@ PatchDataRestartManager::shutdownCallback()
       delete s_manager_instance;
       s_manager_instance = 0;
    }
-}
-
-/*
- *************************************************************************
- *
- * The constructor and destructor are protected and call only be called
- * by the singleton class or its subclasses.
- *
- *************************************************************************
- */
-
-PatchDataRestartManager::PatchDataRestartManager()
-{
-}
-
-/*
- *************************************************************************
- *
- * Destructor
- *
- *************************************************************************
- */
-PatchDataRestartManager::~PatchDataRestartManager()
-{
 }
 
 }

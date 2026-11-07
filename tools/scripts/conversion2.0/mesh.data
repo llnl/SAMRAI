@@ -1,7 +1,7 @@
 ##
 ## File:        $URL$
 ## Package:     SAMRAI build scripts
-## Copyright:   (c) 1997-2025 Lawrence Livermore National Security, LLC
+## Copyright:   (c) 1997-2026 Lawrence Livermore National Security, LLC
 ## Revision:    $LastChangedRevision$
 ## Description: data file for sed substitutions to generate dim-dep. files
 ##

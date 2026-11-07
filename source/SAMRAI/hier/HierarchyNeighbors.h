@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Basic neighbor information within a hierarchy
  *
  ************************************************************************/
@@ -29,7 +29,7 @@ namespace hier {
  * what other Patches in the hierarchy are its neighbors--meaning
  * those Patches on the same or an adjacent level that either overlap the
  * first Patch in space or touch it along a Patch boundary.  This class
- * provides a basic interface for identifying the neightbors of a given
+ * provides a basic interface for identifying the neighbors of a given
  * local Patch.
  *
  * @see Connector
@@ -78,8 +78,8 @@ public:
 
    /*!
     * @brief Destructor
-    */ 
-   ~HierarchyNeighbors();
+    */
+   ~HierarchyNeighbors() = default;
 
    /*!
     * @brief Get the coarsest level number represented by this object

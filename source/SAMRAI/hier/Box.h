@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Box representing a portion of the AMR index space
  *
  ************************************************************************/
@@ -24,7 +24,9 @@
 #include "SAMRAI/tbox/MessageStream.h"
 #include "SAMRAI/tbox/Utilities.h"
 
+#include <array>
 #include <iostream>
+#include <optional>
 
 namespace SAMRAI {
 namespace hier {
@@ -95,6 +97,31 @@ public:
     */
    Box(
       const Box& box);
+
+   /*!
+    * Move constructor
+    */
+   Box(Box&& box) noexcept
+   : d_lo(std::move(box.d_lo)),
+     d_hi(std::move(box.d_hi)),
+     d_block_id(std::move(box.d_block_id)),
+     d_id(std::move(box.d_id)),
+     d_id_locked(false),
+     d_empty_flag(box.d_empty_flag)
+   {
+      box.d_id_locked = false;
+      box.d_empty_flag = EmptyBoxState::BOX_UNKNOWN;
+
+#ifdef BOX_TELEMETRY
+      // Increment the cumulative constructed count, active box count and reset
+      // the high water mark of active boxes if necessary.
+      ++s_cumulative_constructed_ct;
+      ++s_active_ct;
+      if (s_active_ct > s_high_water) {
+         s_high_water = s_active_ct;
+      }
+#endif
+   }
 
    /*!
     * Construct a Box from a DatabaseBox.
@@ -304,14 +331,14 @@ public:
    //! @brief Set the BoxId.
    void
    setId(
-      const BoxId& box_id)
+      const BoxId& box_id) noexcept
    {
       d_id = box_id;
    }
 
    //! @brief Get the BoxId.
-   const BoxId&
-   getBoxId() const
+   constexpr const BoxId&
+   getBoxId() const noexcept
    {
       return d_id;
    }
@@ -319,42 +346,42 @@ public:
    //! @brief Set the BlockId.
    void
    setBlockId(
-      const BlockId& block_id)
+      const BlockId& block_id) noexcept
    {
       d_block_id = block_id;
    }
 
    //! @brief Get the BlockId.
-   const BlockId&
-   getBlockId() const
+   constexpr const BlockId&
+   getBlockId() const noexcept
    {
       return d_block_id;
    }
 
    //! @brief Set the LocalId.
    void
-   setLocalId(const LocalId& local_id)
+   setLocalId(const LocalId& local_id) noexcept
    {
-      return d_id.initialize(local_id, d_id.getOwnerRank(), d_id.getPeriodicId());
+      d_id.initialize(local_id, d_id.getOwnerRank(), d_id.getPeriodicId());
    }
 
    //! @brief Get the LocalId.
-   const LocalId&
-   getLocalId() const
+   constexpr const LocalId&
+   getLocalId() const noexcept
    {
       return d_id.getLocalId();
    }
 
    //! @brief Get the GlobalId.
-   const GlobalId&
-   getGlobalId() const
+   constexpr const GlobalId&
+   getGlobalId() const noexcept
    {
       return d_id.getGlobalId();
    }
 
    //! @brief Get the owner rank.
-   int
-   getOwnerRank() const
+   constexpr int
+   getOwnerRank() const noexcept
    {
       return d_id.getOwnerRank();
    }
@@ -364,49 +391,49 @@ public:
     *
     * @see PeriodicShiftCatalog.
     */
-   const PeriodicId&
-   getPeriodicId() const
+   constexpr const PeriodicId&
+   getPeriodicId() const noexcept
    {
       return d_id.getPeriodicId();
    }
 
    //! @brief Whether the Box is a periodic image.
    bool
-   isPeriodicImage() const
+   isPeriodicImage() const noexcept
    {
       return d_id.isPeriodicImage();
    }
 
-   bool
+   constexpr bool
    isIdEqual(
-      const Box& other) const
+      const Box& other) const noexcept
    {
       return d_id == other.d_id;
    }
 
    struct id_equal {
-      bool
-      operator () (const Box& b1, const Box& b2) const
+      constexpr bool
+      operator () (const Box& b1, const Box& b2) const noexcept
       {
          return b1.isIdEqual(b2);
       }
 
-      bool
-      operator () (const Box* b1, const Box* b2) const
+      constexpr bool
+      operator () (const Box* b1, const Box* b2) const noexcept
       {
          return b1->isIdEqual(*b2);
       }
    };
 
    struct id_less {
-      bool
-      operator () (const Box& b1, const Box& b2) const
+      constexpr bool
+      operator () (const Box& b1, const Box& b2) const noexcept
       {
          return b1.getBoxId() < b2.getBoxId();
       }
 
-      bool
-      operator () (const Box* b1, const Box* b2) const
+      constexpr bool
+      operator () (const Box* b1, const Box* b2) const noexcept
       {
          return b1->getBoxId() < b2->getBoxId();
       }
@@ -424,9 +451,9 @@ public:
     *
     * @see putToIntBuffer(), getFromIntBuffer().
     */
-   static int
+   static constexpr int
    commBufferSize(
-      const tbox::Dimension& dim)
+      const tbox::Dimension& dim) noexcept
    {
       return BoxId::commBufferSize() + (2 * dim.getValue()) + 1;
    }
@@ -490,8 +517,8 @@ public:
    /*!
     * @brief Return a const lower index of the box.
     */
-   const Index&
-   lower() const
+   constexpr const Index&
+   lower() const noexcept
    {
       return d_lo;
    }
@@ -501,7 +528,7 @@ public:
     */
    void
    setLower(
-      const Index& new_lower)
+      const Index& new_lower) noexcept
    {
       d_lo = new_lower;
       d_empty_flag = EmptyBoxState::BOX_UNKNOWN;
@@ -510,8 +537,8 @@ public:
    /*!
     * @brief Return a const upper index of the box.
     */
-   const Index&
-   upper() const
+   constexpr const Index&
+   upper() const noexcept
    {
       return d_hi;
    }
@@ -521,7 +548,7 @@ public:
     */
    void
    setUpper(
-      const Index& new_upper)
+      const Index& new_upper) noexcept
    {
       d_hi = new_upper;
       d_empty_flag = EmptyBoxState::BOX_UNKNOWN;
@@ -530,9 +557,9 @@ public:
    /*!
     * @brief Return the i'th component (const) of the lower index.
     */
-   const int&
+   constexpr const int&
    lower(
-      dir_t i) const
+      dir_t i) const noexcept
    {
       return d_lo(i);
    }
@@ -543,7 +570,7 @@ public:
    void
    setLower(
       dir_t i,
-      int new_lower)
+      int new_lower) noexcept
    {
       d_lo(i) = new_lower;
       d_empty_flag = EmptyBoxState::BOX_UNKNOWN;
@@ -552,9 +579,9 @@ public:
    /*!
     * @brief Return the i'th component (const) of the upper index.
     */
-   const int&
+   constexpr const int&
    upper(
-      dir_t i) const
+      dir_t i) const noexcept
    {
       return d_hi(i);
    }
@@ -565,7 +592,7 @@ public:
    void
    setUpper(
       dir_t i,
-      int new_upper)
+      int new_upper) noexcept
    {
       d_hi(i) = new_upper;
       d_empty_flag = EmptyBoxState::BOX_UNKNOWN;
@@ -594,7 +621,7 @@ public:
     * @return True if the box is empty.
     */
    bool
-   empty() const
+   empty() const noexcept
    {
       if (d_empty_flag == EmptyBoxState::BOX_EMPTY) {
          return true;
@@ -618,7 +645,7 @@ public:
     */
    int
    numberCells(
-      const dir_t i) const
+      const dir_t i) const noexcept
    {
       if (empty()) {
          return 0;
@@ -648,7 +675,7 @@ public:
     * zero.
     */
    size_t
-   size() const
+   size() const noexcept
    {
       size_t mysize = 0;
       if (!empty()) {
@@ -663,8 +690,21 @@ public:
    /*!
     * @brief Return the direction of the box that is longest.
     */
-   dir_t
-   longestDirection() const;
+   constexpr dir_t
+   longestDirection() const noexcept
+   {
+      int max = upper(0) - lower(0);
+      dir_t long_dir = 0;
+
+      for (dir_t i = 1; i < getDim().getValue(); ++i) {
+         if ((upper(i) - lower(i)) > max) {
+            max = upper(i) - lower(i);
+            long_dir = i;
+         }
+      }
+
+      return long_dir;
+   }
 
    /*!
     * @brief Given an index, calculate the offset of the index into the box.
@@ -673,9 +713,9 @@ public:
     * the indices within the box.  This operation is a convenience
     * function for array indexing operations.
     */
-   size_t
+   constexpr size_t
    offset(
-      const Index& p) const
+      const Index& p) const noexcept
    {
       size_t myoffset = 0;
       for (unsigned int i = getDim().getValue() - 1; i > 0; --i) {
@@ -718,9 +758,9 @@ public:
     *
     * @param p
     */
-   bool
+   constexpr bool
    contains(
-      const Index& p) const
+      const Index& p) const noexcept
    {
       for (dir_t i = 0; i < getDim().getValue(); ++i) {
          if ((p(i) < d_lo(i)) || (p(i) > d_hi(i))) {
@@ -749,19 +789,19 @@ public:
     */
    bool
    isSpatiallyEqual(
-      const Box& box) const
+      const Box& box) const noexcept
    {
       return ((d_lo == box.d_lo) && (d_hi == box.d_hi) &&
               (d_block_id == box.d_block_id)) || (empty() && box.empty());
    }
    struct box_equality {
       bool
-      operator () (const Box& b1, const Box& b2) const
+      operator () (const Box& b1, const Box& b2) const noexcept
       {
          return b1.isSpatiallyEqual(b2);
       }
       bool
-      operator () (const Box* b1, const Box* b2) const
+      operator () (const Box* b1, const Box* b2) const noexcept
       {
          return b1->isSpatiallyEqual(*b2);
       }
@@ -897,7 +937,7 @@ public:
     */
    void
    grow(
-      const IntVector& ghosts)
+      const IntVector& ghosts) noexcept
    {
       TBOX_ASSERT_OBJDIM_EQUALITY2(*this, ghosts);
       if (!empty()) {
@@ -931,7 +971,7 @@ public:
    void
    grow(
       const dir_t direction,
-      const int ghosts)
+      const int ghosts) noexcept
    {
       TBOX_ASSERT((direction < getDim().getValue()));
       if (!empty()) {
@@ -951,7 +991,7 @@ public:
     */
    void
    growLower(
-      const IntVector& ghosts)
+      const IntVector& ghosts) noexcept
    {
       TBOX_ASSERT_OBJDIM_EQUALITY2(*this, ghosts);
       if (!empty()) {
@@ -972,7 +1012,7 @@ public:
    void
    growLower(
       const dir_t direction,
-      const int ghosts)
+      const int ghosts) noexcept
    {
       TBOX_ASSERT((direction < getDim().getValue()));
       if (!empty()) {
@@ -991,7 +1031,7 @@ public:
     */
    void
    growUpper(
-      const IntVector& ghosts)
+      const IntVector& ghosts) noexcept
    {
       TBOX_ASSERT_OBJDIM_EQUALITY2(*this, ghosts);
       if (!empty()) {
@@ -1012,7 +1052,7 @@ public:
    void
    growUpper(
       const dir_t direction,
-      const int ghosts)
+      const int ghosts) noexcept
    {
       TBOX_ASSERT((direction < getDim().getValue()));
       if (!empty()) {
@@ -1066,7 +1106,7 @@ public:
     */
    void
    shift(
-      const IntVector& offset)
+      const IntVector& offset) noexcept
    {
       TBOX_ASSERT_OBJDIM_EQUALITY2(*this, offset);
       d_lo += offset;
@@ -1087,7 +1127,7 @@ public:
    void
    shift(
       const dir_t direction,
-      const int offset)
+      const int offset) noexcept
    {
       TBOX_ASSERT((direction < getDim().getValue()));
       d_lo(direction) += offset;
@@ -1135,7 +1175,7 @@ public:
     */
    void
    coarsen(
-      const IntVector& ratio)
+      const IntVector& ratio) noexcept
    {
       TBOX_ASSERT_OBJDIM_EQUALITY2(*this, ratio);
       if (ratio.getNumBlocks() > 1) {
@@ -1293,8 +1333,8 @@ public:
    /*!
     * @brief Return the dimension of this object.
     */
-   const tbox::Dimension&
-   getDim() const
+   constexpr const tbox::Dimension&
+   getDim() const noexcept
    {
       return d_lo.getDim();
    }
@@ -1304,7 +1344,7 @@ public:
     * way.
     */
    void
-   lockId()
+   lockId() noexcept
    {
       d_id_locked = true;
    }
@@ -1312,8 +1352,8 @@ public:
    /*!
     * @brief Returns true if the BoxId of this Box is locked.
     */
-   bool
-   idLocked() const
+   constexpr bool
+   idLocked() const noexcept
    {
       return d_id_locked;
    }
@@ -1345,7 +1385,8 @@ public:
    getEmptyBox(
       const tbox::Dimension& dim)
    {
-      return *(s_emptys[dim.getValue() - 1]);
+      TBOX_ASSERT(s_emptys[dim.getValue() - 1].has_value());
+      return (s_emptys[dim.getValue() - 1].value());
    }
 
    /*!
@@ -1356,7 +1397,8 @@ public:
    getUniverse(
       const tbox::Dimension& dim)
    {
-      return *(s_universes[dim.getValue() - 1]);
+      TBOX_ASSERT(s_universes[dim.getValue() - 1].has_value());
+      return (s_universes[dim.getValue() - 1].value());
    }
 
    friend class BoxIterator;
@@ -1378,12 +1420,12 @@ private:
    /**
     * Unimplemented default constructor.
     */
-   Box();
+   Box() = delete;
 
-   static int
+   static constexpr int
    coarsen(
       const int index,
-      const int ratio)
+      const int ratio) noexcept
    {
       return index < 0 ? (index + 1) / ratio - 1 : index / ratio;
    }
@@ -1435,14 +1477,13 @@ private:
     * as a performance enhancement to avoid constructing
     * them in multiple places.
     */
-
-   static Box* s_emptys[SAMRAI::MAX_DIM_VAL];
+   static std::array<std::optional<Box>, SAMRAI::MAX_DIM_VAL> s_emptys;
 
    /*
     * Box that represents the maximum allowed index extents,
     * the "universe" that can be represented.
     */
-   static Box* s_universes[SAMRAI::MAX_DIM_VAL];
+   static std::array<std::optional<Box>, SAMRAI::MAX_DIM_VAL> s_universes;
 
    static tbox::StartupShutdownManager::Handler
       s_initialize_finalize_handler;
@@ -1487,32 +1528,24 @@ public:
    /**
     * Copy constructor for the box iterator.
     */
-   BoxIterator(
-      const BoxIterator& iterator);
+   BoxIterator(const BoxIterator& iterator) = default;
 
    /**
     * Assignment operator for the box iterator.
     */
-   BoxIterator&
-   operator = (
-      const BoxIterator& iterator)
-   {
-      d_index = iterator.d_index;
-      d_box = iterator.d_box;
-      return *this;
-   }
+   BoxIterator& operator = (const BoxIterator& iterator) = default;
 
    /**
     * Destructor for the box iterator.
     */
-   ~BoxIterator();
+   ~BoxIterator() = default;
 
    /**
     * Return the current index in the box.  This operation is undefined
     * if the iterator is past the last Index in the box.
     */
-   const Index&
-   operator * () const
+   constexpr const Index&
+   operator * () const noexcept
    {
       return d_index;
    }
@@ -1521,8 +1554,8 @@ public:
     * Return a pointer to the current index in the box.  This operation is
     * undefined if the iterator is past the last Index in the box.
     */
-   const Index *
-   operator -> () const
+   constexpr const Index *
+   operator -> () const noexcept
    {
       return &d_index;
    }
@@ -1550,7 +1583,7 @@ public:
     * Pre-increment the iterator to point to the next index in the box.
     */
    BoxIterator&
-   operator ++ ()
+   operator ++ () noexcept
    {
       ++d_index(0);
       for (dir_t i = 0; i < (d_index.getDim().getValue() - 1); ++i) {
@@ -1566,9 +1599,9 @@ public:
    /**
     * Test two iterators for equality (same index value).
     */
-   bool
+   constexpr bool
    operator == (
-      const BoxIterator& iterator) const
+      const BoxIterator& iterator) const noexcept
    {
       return d_index == iterator.d_index;
    }
@@ -1576,16 +1609,16 @@ public:
    /**
     * Test two iterators for inequality (different index values).
     */
-   bool
+   constexpr bool
    operator != (
-      const BoxIterator& iterator) const
+      const BoxIterator& iterator) const noexcept
    {
       return d_index != iterator.d_index;
    }
 
-   bool
+   constexpr bool
    operator < (
-       const BoxIterator& iterator) const
+       const BoxIterator& iterator) const noexcept
    {
      return d_index < iterator.d_index;
    }
@@ -1602,7 +1635,7 @@ private:
    /*
     * Unimplemented default constructor.
     */
-   BoxIterator();
+   BoxIterator() = delete;
 
    Index d_index;
 

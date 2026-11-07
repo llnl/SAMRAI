@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Common Box operations for Box containers.
  *
  ************************************************************************/
@@ -53,7 +53,7 @@ public:
 
 private:
    // Disabled constructor.  No need for objects of this class.
-   BoxContainerUtils();
+   BoxContainerUtils() = default;
 
 };
 

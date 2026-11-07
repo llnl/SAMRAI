@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   A container of boxes with basic domain calculus operations
  *
  ************************************************************************/
@@ -148,7 +148,7 @@ public:
       /*!
        * @brief The destructor releases all storage.
        */
-      ~BoxContainerConstIterator();
+      ~BoxContainerConstIterator() = default;
 
       /*!
        * @brief Get box corresponding to iterator's position in container.
@@ -361,7 +361,7 @@ public:
       /*!
        * @brief The destructor releases all storage.
        */
-      ~BoxContainerIterator();
+      ~BoxContainerIterator() = default;
 
       /*!
        * @brief Get box corresponding to iterator's position in container.
@@ -563,6 +563,46 @@ private:
       const bool ordered);
 
    /*!
+    * @brief Move constructor.
+    *
+    * Constructs a BoxContainer by taking ownership of the internal
+    * storage and state from another BoxContainer.
+    *
+    * @param[in] other  BoxContainer to move from.
+    */
+   BoxContainer(
+      BoxContainer&& other) noexcept
+   : d_list(std::move(other.d_list)),
+     d_set(std::move(other.d_set)),
+     d_ordered(other.d_ordered),
+     d_tree(std::move(other.d_tree))
+   {
+      // No additional work needed.
+   }
+
+   /*!
+    * @brief Move assignment operator.
+    *
+    * Replaces the contents of this BoxContainer by taking ownership of
+    * the internal storage and state from another BoxContainer.
+    *
+    * @param[in] other  BoxContainer to move from.
+    *
+    * @return Reference to this BoxContainer.
+    */
+   BoxContainer&
+   operator =(
+      BoxContainer&& other) noexcept
+   {
+      if (this != &other) {
+         d_list = std::move(other.d_list);
+         d_set = std::move(other.d_set);
+         d_ordered = other.d_ordered;
+         d_tree = std::move(other.d_tree);
+      }
+      return *this;
+   }
+   /*!
     * @brief Create container containing members from another container.
     *
     * Members in the range [first, last) are copied to new container.
@@ -649,7 +689,7 @@ private:
    /*!
     * @brief The destructor releases all storage.
     */
-   ~BoxContainer();
+   ~BoxContainer() = default;
 
    //@}
 
@@ -1007,7 +1047,7 @@ private:
     *
     * @return  True if ordered, false if unordered.
     */
-   bool
+   constexpr bool
    isOrdered() const
    {
       return d_ordered;
@@ -1078,6 +1118,82 @@ private:
    }
 
    /*!
+    * @brief Emplaces constructed Box at the front of the container.
+    *
+    * Forwards arguments to the Box constructor and makes the
+    * new Box the member that will be returned by front() in an
+    * unordered container.
+    *
+    * When assertions are enabled and a Box is emplaced into a non-empty
+    * container, there will be an assertion error if the dimension of
+    * the new Box is not equal to the dimension of the Box at the
+    * back of the container.
+    *
+    * @tparam Args  Valid Box constructor arguments, forwarded to the
+    *               constructor
+    *
+    * @pre !isOrdered()
+    */
+   template <typename... Args>
+   void
+   emplaceFront(Args&&... args)
+   {
+      if (!d_ordered) {
+         d_list.emplace_front(std::forward<Args>(args)...);
+
+#ifdef DEBUG_CHECK_ASSERTIONS
+         if (d_list.size() > 1) {
+            TBOX_ASSERT_OBJDIM_EQUALITY2(back(), d_list.front());
+         }
+#endif
+      } else {
+         TBOX_ERROR("Attempted emplaceFront on an ordered BoxContainer" << std::endl);
+      }
+
+      if (d_tree) {
+         d_tree.reset();
+      }
+   }
+
+   /*!
+    * @brief Emplaces constructed Box at the end of the container.
+    *
+    * Forwards arguments to the Box constructor and makes the
+    * new Box the member that will be returned by back() in an
+    * unordered container.
+    *
+    * When assertions are enabled and a Box is emplaced into a non-empty
+    * container, there will be an assertion error if the dimension of
+    * the new Box is not equal to the dimension of the Box at the
+    * front of the container.
+    *
+    * @tparam Args  Valid Box constructor arguments, forwarded to the
+    *               constructor
+    *
+    * @pre !isOrdered()
+    */
+   template <typename... Args>
+   void
+   emplaceBack(Args&&... args)
+   {
+      if (!d_ordered) {
+         d_list.emplace_back(std::forward<Args>(args)...);
+
+#ifdef DEBUG_CHECK_ASSERTIONS
+         if (d_list.size() > 1) {
+            TBOX_ASSERT_OBJDIM_EQUALITY2(front(), d_list.back());
+         }
+#endif
+      } else {
+         TBOX_ERROR("Attempted emplaceBack on an ordered BoxContainer" << std::endl);
+      }
+
+      if (d_tree) {
+         d_tree.reset();
+      }
+   }
+
+   /*!
     * @brief STL-named version of pushFront().
     */
    void
@@ -1095,6 +1211,26 @@ private:
       const Box& item)
    {
       pushBack(item);
+   }
+
+   /*!
+    * @brief STL-named version of emplaceFront().
+    */
+   void
+   emplace_front(
+      const Box& item)
+   {
+      pushFront(item);
+   }
+
+   /*!
+    * @brief STL-named version of emplaceBack().
+    */
+   void
+   emplace_back(
+      const Box& item)
+   {
+      emplaceBack(item);
    }
 
    /*!

@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Main program for testing SAMRAI data access
  *
  ************************************************************************/
@@ -11,11 +11,17 @@
 #include "SAMRAI/SAMRAI_config.h"
 
 #include "SAMRAI/hier/Box.h"
+#include "SAMRAI/hier/Index.h"
 #include "SAMRAI/pdat/CellData.h"
+#include "SAMRAI/pdat/CellIndex.h"
 #include "SAMRAI/pdat/EdgeData.h"
+#include "SAMRAI/pdat/EdgeIndex.h"
 #include "SAMRAI/pdat/FaceData.h"
+#include "SAMRAI/pdat/FaceIndex.h"
 #include "SAMRAI/pdat/NodeData.h"
+#include "SAMRAI/pdat/NodeIndex.h"
 #include "SAMRAI/pdat/SideData.h"
+#include "SAMRAI/pdat/SideIndex.h"
 #include "SAMRAI/tbox/SAMRAI_MPI.h"
 #include "SAMRAI/tbox/MathUtilities.h"
 #include "SAMRAI/tbox/InputManager.h"
@@ -23,7 +29,118 @@
 
 #include <stdlib.h>
 
+#include <concepts>
+
 using namespace SAMRAI;
+
+namespace {
+
+template <class L, class R>
+concept HasPlus = requires(const L& lhs, const R& rhs) {
+   lhs + rhs;
+};
+
+template <class L, class R>
+concept HasPlusEquals = requires(L& lhs, const R& rhs) {
+   lhs += rhs;
+};
+
+template <class L, class R>
+concept HasMinus = requires(const L& lhs, const R& rhs) {
+   lhs - rhs;
+};
+
+template <class L, class R>
+concept HasMinusEquals = requires(L& lhs, const R& rhs) {
+   lhs -= rhs;
+};
+
+static_assert(HasPlus<pdat::CellIndex, hier::Index>);
+static_assert(HasPlus<pdat::CellIndex, pdat::CellIndex>);
+static_assert(!HasPlus<pdat::CellIndex, pdat::NodeIndex>);
+static_assert(!HasPlus<pdat::CellIndex, pdat::FaceIndex>);
+static_assert(!HasPlus<pdat::CellIndex, pdat::SideIndex>);
+static_assert(!HasPlus<pdat::CellIndex, pdat::EdgeIndex>);
+static_assert(HasPlusEquals<pdat::CellIndex, hier::Index>);
+static_assert(HasPlusEquals<pdat::CellIndex, pdat::CellIndex>);
+static_assert(HasMinus<pdat::CellIndex, hier::Index>);
+static_assert(HasMinus<pdat::CellIndex, pdat::CellIndex>);
+static_assert(!HasMinus<pdat::CellIndex, pdat::NodeIndex>);
+static_assert(!HasMinus<pdat::CellIndex, pdat::FaceIndex>);
+static_assert(!HasMinus<pdat::CellIndex, pdat::SideIndex>);
+static_assert(!HasMinus<pdat::CellIndex, pdat::EdgeIndex>);
+static_assert(HasMinusEquals<pdat::CellIndex, hier::Index>);
+static_assert(HasMinusEquals<pdat::CellIndex, pdat::CellIndex>);
+
+static_assert(!HasPlus<pdat::NodeIndex, hier::Index>);
+static_assert(HasPlus<pdat::NodeIndex, pdat::NodeIndex>);
+static_assert(!HasPlus<pdat::NodeIndex, pdat::CellIndex>);
+static_assert(!HasPlus<pdat::NodeIndex, pdat::FaceIndex>);
+static_assert(!HasPlus<pdat::NodeIndex, pdat::SideIndex>);
+static_assert(!HasPlus<pdat::NodeIndex, pdat::EdgeIndex>);
+static_assert(!HasPlusEquals<pdat::NodeIndex, hier::Index>);
+static_assert(HasPlusEquals<pdat::NodeIndex, pdat::NodeIndex>);
+static_assert(!HasMinus<pdat::NodeIndex, hier::Index>);
+static_assert(HasMinus<pdat::NodeIndex, pdat::NodeIndex>);
+static_assert(!HasMinus<pdat::NodeIndex, pdat::CellIndex>);
+static_assert(!HasMinus<pdat::NodeIndex, pdat::FaceIndex>);
+static_assert(!HasMinus<pdat::NodeIndex, pdat::SideIndex>);
+static_assert(!HasMinus<pdat::NodeIndex, pdat::EdgeIndex>);
+static_assert(!HasMinusEquals<pdat::NodeIndex, hier::Index>);
+static_assert(HasMinusEquals<pdat::NodeIndex, pdat::NodeIndex>);
+
+static_assert(!HasPlus<pdat::FaceIndex, hier::Index>);
+static_assert(HasPlus<pdat::FaceIndex, pdat::FaceIndex>);
+static_assert(!HasPlus<pdat::FaceIndex, pdat::CellIndex>);
+static_assert(!HasPlus<pdat::FaceIndex, pdat::NodeIndex>);
+static_assert(!HasPlus<pdat::FaceIndex, pdat::SideIndex>);
+static_assert(!HasPlus<pdat::FaceIndex, pdat::EdgeIndex>);
+static_assert(!HasPlusEquals<pdat::FaceIndex, hier::Index>);
+static_assert(HasPlusEquals<pdat::FaceIndex, pdat::FaceIndex>);
+static_assert(!HasMinus<pdat::FaceIndex, hier::Index>);
+static_assert(HasMinus<pdat::FaceIndex, pdat::FaceIndex>);
+static_assert(!HasMinus<pdat::FaceIndex, pdat::CellIndex>);
+static_assert(!HasMinus<pdat::FaceIndex, pdat::NodeIndex>);
+static_assert(!HasMinus<pdat::FaceIndex, pdat::SideIndex>);
+static_assert(!HasMinus<pdat::FaceIndex, pdat::EdgeIndex>);
+static_assert(!HasMinusEquals<pdat::FaceIndex, hier::Index>);
+static_assert(HasMinusEquals<pdat::FaceIndex, pdat::FaceIndex>);
+
+static_assert(!HasPlus<pdat::SideIndex, hier::Index>);
+static_assert(HasPlus<pdat::SideIndex, pdat::SideIndex>);
+static_assert(!HasPlus<pdat::SideIndex, pdat::CellIndex>);
+static_assert(!HasPlus<pdat::SideIndex, pdat::NodeIndex>);
+static_assert(!HasPlus<pdat::SideIndex, pdat::FaceIndex>);
+static_assert(!HasPlus<pdat::SideIndex, pdat::EdgeIndex>);
+static_assert(!HasPlusEquals<pdat::SideIndex, hier::Index>);
+static_assert(HasPlusEquals<pdat::SideIndex, pdat::SideIndex>);
+static_assert(!HasMinus<pdat::SideIndex, hier::Index>);
+static_assert(HasMinus<pdat::SideIndex, pdat::SideIndex>);
+static_assert(!HasMinus<pdat::SideIndex, pdat::CellIndex>);
+static_assert(!HasMinus<pdat::SideIndex, pdat::NodeIndex>);
+static_assert(!HasMinus<pdat::SideIndex, pdat::FaceIndex>);
+static_assert(!HasMinus<pdat::SideIndex, pdat::EdgeIndex>);
+static_assert(!HasMinusEquals<pdat::SideIndex, hier::Index>);
+static_assert(HasMinusEquals<pdat::SideIndex, pdat::SideIndex>);
+
+static_assert(!HasPlus<pdat::EdgeIndex, hier::Index>);
+static_assert(HasPlus<pdat::EdgeIndex, pdat::EdgeIndex>);
+static_assert(!HasPlus<pdat::EdgeIndex, pdat::CellIndex>);
+static_assert(!HasPlus<pdat::EdgeIndex, pdat::NodeIndex>);
+static_assert(!HasPlus<pdat::EdgeIndex, pdat::FaceIndex>);
+static_assert(!HasPlus<pdat::EdgeIndex, pdat::SideIndex>);
+static_assert(!HasPlusEquals<pdat::EdgeIndex, hier::Index>);
+static_assert(HasPlusEquals<pdat::EdgeIndex, pdat::EdgeIndex>);
+static_assert(!HasMinus<pdat::EdgeIndex, hier::Index>);
+static_assert(HasMinus<pdat::EdgeIndex, pdat::EdgeIndex>);
+static_assert(!HasMinus<pdat::EdgeIndex, pdat::CellIndex>);
+static_assert(!HasMinus<pdat::EdgeIndex, pdat::NodeIndex>);
+static_assert(!HasMinus<pdat::EdgeIndex, pdat::FaceIndex>);
+static_assert(!HasMinus<pdat::EdgeIndex, pdat::SideIndex>);
+static_assert(!HasMinusEquals<pdat::EdgeIndex, hier::Index>);
+static_assert(HasMinusEquals<pdat::EdgeIndex, pdat::EdgeIndex>);
+
+}  // namespace
 
 int main(
    int argc,

@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Box geometry description for overlap computations
  *
  ************************************************************************/
@@ -73,12 +73,12 @@ public:
    /**
     * The default constructor for BoxGeometry does nothing interesting.
     */
-   BoxGeometry();
+   BoxGeometry() = default;
 
    /**
     * The virtual destructor does nothing interesting.
     */
-   virtual ~BoxGeometry();
+   virtual ~BoxGeometry() = default;
 
    /**
     * Calculate the overlap between two box geometry objects given the
@@ -161,10 +161,10 @@ public:
 
 private:
    BoxGeometry(
-      const BoxGeometry&);              // not implemented
+      const BoxGeometry&) = delete;
    BoxGeometry&
    operator = (
-      const BoxGeometry&);              // not implemented
+      const BoxGeometry&) = delete;
 
 };
 

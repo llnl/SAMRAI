@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Manager of Connectors incident from a common BoxLevel.
  *
  ************************************************************************/
@@ -106,11 +106,12 @@ public:
    setCreateEmptyNeighborContainers(
       bool create_empty_neighbor_containers);
 
-private:
    /*!
     * @brief Deletes all Connectors to and from this object
     */
    ~PersistentOverlapConnectors();
+
+private:
 
    /*!
     * @brief Create an overlap Connector, computing relationships by

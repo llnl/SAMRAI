@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   A N-dimensional integer vector
  *
  ************************************************************************/
@@ -1205,8 +1205,6 @@ public:
       const IntVector& rhs);
 
 private:
-
-   typedef struct MaxIntArray { int d_array[3]; } MaxIntArray;
 
    /*
     * Unimplemented default constructor

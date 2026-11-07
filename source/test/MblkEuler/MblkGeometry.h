@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   this class creates mapped multiblock grid geometries.
  *                The supported grid types include Cartesian, Wedge, and
  *                Spherical shell.  The spherical shell case is a full

@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Describes boundaries for a patch
  *
  ************************************************************************/
@@ -24,23 +24,6 @@ PatchBoundaries::PatchBoundaries(
    d_dim(dim),
    d_array_of_bboxes(dim.getValue())
 {
-}
-
-/*
- *************************************************************************
- *
- * Copy constructor
- *
- *************************************************************************
- */
-PatchBoundaries::PatchBoundaries(
-   const PatchBoundaries& r):
-   d_dim(r.d_dim),
-   d_array_of_bboxes(r.d_dim.getValue())
-{
-   for (unsigned int d = 0; d < d_dim.getValue(); ++d) {
-      d_array_of_bboxes[d] = r.d_array_of_bboxes[d];
-   }
 }
 
 } // SAMRAI namespace

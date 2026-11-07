@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   An AMR hierarchy of patch levels
  *
  ************************************************************************/
@@ -16,6 +16,16 @@
 #include "SAMRAI/hier/VariableDatabase.h"
 #include "SAMRAI/tbox/RestartManager.h"
 #include "SAMRAI/tbox/MathUtilities.h"
+
+namespace {
+inline int positiveModulo(int a, int m)
+{
+   TBOX_ASSERT(m > 0);
+   int r = a % m;
+   return (r < 0) ? (r + m) : r;
+}
+
+} // anonymous namespace
 
 
 namespace SAMRAI {
@@ -837,7 +847,7 @@ PatchHierarchy::makeNewPatchLevel(
       }
    }
    if (static_cast<int>(d_patch_levels.size()) > ln &&
-       d_patch_levels[ln].get() != 0) {
+       d_patch_levels[ln].get() != nullptr) {
       TBOX_ERROR("PatchHierarchy::makeNewPatchLevel: patch level "
          << ln << " already exists. "
          << "Remove old level from the hierarchy before making "
@@ -909,7 +919,7 @@ PatchHierarchy::makeNewPatchLevel(
       }
    }
    if (static_cast<int>(d_patch_levels.size()) > ln &&
-       d_patch_levels[ln].get() != 0) {
+       d_patch_levels[ln].get() != nullptr) {
       TBOX_ERROR("PatchHierarchy::makeNewPatchLevel: patch level "
          << ln << " already exists. "
          << "Remove old level from the hierarchy before making "
@@ -1218,7 +1228,7 @@ PatchHierarchy::makeBlueprintDatabase(
             domain_db->putDatabase("topologies"));
 
          std::shared_ptr<tbox::Database> topo_db(
-            topologies_db->putDatabase("mesh"));
+            topologies_db->putDatabase(bp_utils.getTopologyName()));
 
          std::shared_ptr<tbox::Database> elem_db(
             topo_db->putDatabase("elements"));
@@ -1235,13 +1245,13 @@ PatchHierarchy::makeBlueprintDatabase(
    }
 
    if (d_number_levels > 1) {
-      makeNestingSets(blueprint_db, "mesh");
+      makeNestingSets(blueprint_db, bp_utils.getTopologyName());
    }
 
    // AMR Adjacency sets not supported in current Conduit release
-   //makeAdjacencySets(blueprint_db, "mesh");
+   //makeAdjacencySets(blueprint_db, bp_utils.getTopologyName());
 
-   bp_utils.putTopologyAndCoordinatesToDatabase(blueprint_db, *this, "mesh");
+   bp_utils.putTopologyAndCoordinatesToDatabase(blueprint_db, *this, bp_utils.getTopologyName());
 }
 
 void
@@ -1298,7 +1308,7 @@ PatchHierarchy::makeFlattenedBlueprintDatabase(
                domain_db->putDatabase("topologies"));
 
             std::shared_ptr<tbox::Database> topo_db(
-               topologies_db->putDatabase("mesh"));
+               topologies_db->putDatabase(bp_utils.getTopologyName()));
 
             std::shared_ptr<tbox::Database> elem_db(
                topo_db->putDatabase("elements"));
@@ -1318,9 +1328,10 @@ PatchHierarchy::makeFlattenedBlueprintDatabase(
       flat_box_level[i]->finalize();
    }
 
-   makeAdjacencySets(blueprint_db, flat_hier, flat_box_level, "mesh");
+   makeAdjacencySets(blueprint_db, flat_hier, flat_box_level, bp_utils.getTopologyName());
 
-   bp_utils.putTopologyAndCoordinatesToDatabase(blueprint_db, *this, flat_hier,  "mesh");
+   bp_utils.putTopologyAndCoordinatesToDatabase(blueprint_db, *this, flat_hier,  bp_utils.getTopologyName());
+   bp_utils.putFieldsToDatabase(blueprint_db, *this, flat_hier, bp_utils.getTopologyName());
 }
 #endif
 
@@ -1726,7 +1737,7 @@ PatchHierarchy::makeAdjacencySets(
 
                }
 
-	       if (node_ovlp.empty() != tnode_ovlp.empty()) {
+               if (node_ovlp.empty() != tnode_ovlp.empty()) {
                   node_ovlp.setEmpty();
                   tnode_ovlp.setEmpty();
                }
@@ -2030,12 +2041,37 @@ PatchHierarchy::makeAdjacencySets(
                      IntVector a_ratio(ratio.getBlockVector(domain_box.getBlockId()));
                      IntVector b_ratio(ratio.getBlockVector(nbr_box.getBlockId()));
 
+                     IntVector partial_lo(d_dim, 0);
+                     IntVector partial_hi(d_dim, 0);
+                     for (int d = 0; d < d_dim.getValue(); ++d) {
+                        if (b_width[d] > 1) {
+                           const int& ovlp_lo = tnode_ovlp.lower(d);
+                           partial_lo[d] = positiveModulo(ovlp_lo, b_ratio[d]);
+                           if (partial_lo[d]) {
+                              tnode_ovlp.setLower(d, ovlp_lo - partial_lo[d]);
+                              b_width[d] += partial_lo[d];
+                           }
+                           const int& ovlp_hi = tnode_ovlp.upper(d);
+                           partial_hi[d] = positiveModulo(ovlp_hi, b_ratio[d]);
+                           if (partial_hi[d]) {
+                              partial_hi[d] = b_ratio[d] - partial_hi[d];
+                              tnode_ovlp.setUpper(d, ovlp_hi + partial_hi[d]);
+                              b_width[d] += partial_hi[d];
+                           }
+                        }
+                     }
+                     std::shared_ptr<tbox::Database> partial_lo_b_db(
+                        window_b_db->putDatabase("partial_lo"));
+                     std::shared_ptr<tbox::Database> partial_hi_b_db(
+                        window_b_db->putDatabase("partial_hi"));
+                     partial_lo_b_db->putInteger("i", partial_lo[0]);
+                     partial_hi_b_db->putInteger("i", partial_hi[0]);
                      origin_a_db->putInteger("i", node_ovlp.lower(0));
                      width_a_db->putInteger("i", a_width[0]);
                      ratio_a_db->putInteger("i", a_ratio[0]);
                      origin_b_db->putInteger("i", tnode_ovlp.lower(0));
                      width_b_db->putInteger("i", b_width[0]);
-                     ratio_b_db->putInteger("i", a_ratio[0]);
+                     ratio_b_db->putInteger("i", b_ratio[0]);
                      if (d_dim.getValue() > 1) {
                         origin_a_db->putInteger("j", node_ovlp.lower(1));
                         width_a_db->putInteger("j", a_width[1]);
@@ -2043,6 +2079,8 @@ PatchHierarchy::makeAdjacencySets(
                         origin_b_db->putInteger("j", tnode_ovlp.lower(1));
                         width_b_db->putInteger("j", b_width[1]);
                         ratio_b_db->putInteger("j", b_ratio[1]);
+                        partial_lo_b_db->putInteger("j", partial_lo[1]);
+                        partial_hi_b_db->putInteger("j", partial_hi[1]);
                      }
                      if (d_dim.getValue() > 2) {
                         origin_a_db->putInteger("k", node_ovlp.lower(2));
@@ -2051,6 +2089,8 @@ PatchHierarchy::makeAdjacencySets(
                         origin_b_db->putInteger("k", tnode_ovlp.lower(2));
                         width_b_db->putInteger("k", b_width[2]);
                         ratio_b_db->putInteger("k", b_ratio[2]);
+                        partial_lo_b_db->putInteger("k", partial_lo[2]);
+                        partial_hi_b_db->putInteger("k", partial_hi[2]);
                      }
 
                      if (pbox.getBlockId() != nbr_box.getBlockId()) {
@@ -2257,12 +2297,39 @@ PatchHierarchy::makeAdjacencySets(
                      IntVector a_ratio(ratio.getBlockVector(domain_box.getBlockId()));
                      IntVector b_ratio(ratio.getBlockVector(nbr_box.getBlockId()));
 
+
+                     IntVector partial_lo(d_dim, 0);
+                     IntVector partial_hi(d_dim, 0);
+                     for (int d = 0; d < d_dim.getValue(); ++d) {
+                        if (a_width[d] > 1) {
+                           const int& ovlp_lo = node_ovlp.lower(d);
+                           partial_lo[d] = positiveModulo(ovlp_lo, a_ratio[d]);
+                           if (partial_lo[d]) {
+                              node_ovlp.setLower(d, ovlp_lo - partial_lo[d]);
+                              a_width[d] += partial_lo[d];
+                           }
+                           const int& ovlp_hi = node_ovlp.upper(d);
+                           partial_hi[d] = positiveModulo(ovlp_hi, a_ratio[d]);
+                           if (partial_hi[d]) {
+                              partial_hi[d] = a_ratio[d] - partial_hi[d];
+                              node_ovlp.setUpper(d, ovlp_hi + partial_hi[d]);
+                              a_width[d] += partial_hi[d];
+                           }
+                        }
+                     }
+                     std::shared_ptr<tbox::Database> partial_lo_a_db(
+                        window_a_db->putDatabase("partial_lo"));
+                     std::shared_ptr<tbox::Database> partial_hi_a_db(
+                        window_a_db->putDatabase("partial_hi"));
+                     partial_lo_a_db->putInteger("i", partial_lo[0]);
+                     partial_hi_a_db->putInteger("i", partial_hi[0]);
+
                      origin_a_db->putInteger("i", node_ovlp.lower(0));
                      width_a_db->putInteger("i", a_width[0]);
                      ratio_a_db->putInteger("i", a_ratio[0]);
                      origin_b_db->putInteger("i", tnode_ovlp.lower(0));
                      width_b_db->putInteger("i", b_width[0]);
-                     ratio_b_db->putInteger("i", a_ratio[0]);
+                     ratio_b_db->putInteger("i", b_ratio[0]);
                      if (d_dim.getValue() > 1) {
                         origin_a_db->putInteger("j", node_ovlp.lower(1));
                         width_a_db->putInteger("j", a_width[1]);
@@ -2270,6 +2337,8 @@ PatchHierarchy::makeAdjacencySets(
                         origin_b_db->putInteger("j", tnode_ovlp.lower(1));
                         width_b_db->putInteger("j", b_width[1]);
                         ratio_b_db->putInteger("j", b_ratio[1]);
+                        partial_lo_a_db->putInteger("j", partial_lo[1]);
+                        partial_hi_a_db->putInteger("j", partial_hi[1]);
                      }
                      if (d_dim.getValue() > 2) {
                         origin_a_db->putInteger("k", node_ovlp.lower(2));
@@ -2278,6 +2347,8 @@ PatchHierarchy::makeAdjacencySets(
                         origin_b_db->putInteger("k", tnode_ovlp.lower(2));
                         width_b_db->putInteger("k", b_width[2]);
                         ratio_b_db->putInteger("k", b_ratio[2]);
+                        partial_lo_a_db->putInteger("k", partial_lo[2]);
+                        partial_hi_a_db->putInteger("k", partial_hi[2]);
                      }
 
                      if (pbox.getBlockId() != nbr_box.getBlockId()) {
@@ -2523,9 +2594,6 @@ PatchHierarchy::recursivePrint(
    return 0;
 }
 
-PatchHierarchy::ConnectorWidthRequestorStrategy::~ConnectorWidthRequestorStrategy()
-{
-}
 
 }
 }

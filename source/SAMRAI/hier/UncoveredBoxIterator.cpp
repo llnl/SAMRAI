@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   A container of boxes with basic domain calculus operations
  *
  ************************************************************************/
@@ -22,7 +22,7 @@ UncoveredBoxIterator::UncoveredBoxIterator(
    d_hierarchy(hierarchy),
    d_uncovered_boxes_itr(BoxContainer().begin()),
    d_uncovered_boxes_itr_end(BoxContainer().end()),
-   d_item(0)
+   d_item(nullptr)
 {
    TBOX_ASSERT(hierarchy);
 
@@ -34,7 +34,7 @@ UncoveredBoxIterator::UncoveredBoxIterator(
       findFirstUncoveredBox();
    } else {
       d_level_num = d_finest_level_num + 1;
-      d_flattened_hierarchy = 0;
+      d_flattened_hierarchy = nullptr;
       d_allocated_flattened_hierarchy = false;
    }
 }
@@ -46,7 +46,7 @@ UncoveredBoxIterator::UncoveredBoxIterator(
    d_hierarchy(&(flattened_hierarchy->getPatchHierarchy())),
    d_uncovered_boxes_itr(BoxContainer().begin()),
    d_uncovered_boxes_itr_end(BoxContainer().end()),
-   d_item(0)
+   d_item(nullptr)
 {
    TBOX_ASSERT(flattened_hierarchy);
 
@@ -58,7 +58,7 @@ UncoveredBoxIterator::UncoveredBoxIterator(
       findFirstUncoveredBox();
    } else {
       d_level_num = d_finest_level_num + 1;
-      d_flattened_hierarchy = 0;
+      d_flattened_hierarchy = nullptr;
       d_allocated_flattened_hierarchy = false;
    }
 }
@@ -66,13 +66,13 @@ UncoveredBoxIterator::UncoveredBoxIterator(
 UncoveredBoxIterator::UncoveredBoxIterator(
    const UncoveredBoxIterator& other):
    d_hierarchy(other.d_hierarchy),
-   d_flattened_hierarchy(0),
+   d_flattened_hierarchy(nullptr),
    d_allocated_flattened_hierarchy(false),
    d_level_num(other.d_level_num),
    d_current_patch_id(other.d_current_patch_id),
    d_uncovered_boxes_itr(other.d_uncovered_boxes_itr),
    d_uncovered_boxes_itr_end(other.d_uncovered_boxes_itr_end),
-   d_item(0),
+   d_item(nullptr),
    d_finest_level_num(other.d_finest_level_num)
 {
    if (other.d_item) {
@@ -136,13 +136,13 @@ UncoveredBoxIterator::operator = (
          d_item->first = rhs.d_item->first;
          d_item->second = rhs.d_item->second;
       } else {
-         d_item = 0;
+         d_item = nullptr;
       } 
       d_finest_level_num = rhs.d_finest_level_num;
       if (d_flattened_hierarchy && d_allocated_flattened_hierarchy) {
          delete d_flattened_hierarchy;
       }
-      d_flattened_hierarchy = 0;
+      d_flattened_hierarchy = nullptr;
       d_allocated_flattened_hierarchy = false;
       if (rhs.d_flattened_hierarchy) {
          d_flattened_hierarchy =
@@ -198,20 +198,20 @@ UncoveredBoxIterator::operator == (
    bool result = d_hierarchy == rhs.d_hierarchy &&
       d_level_num == rhs.d_level_num;
 
-   if (d_flattened_hierarchy == 0 && rhs.d_flattened_hierarchy != 0) {
+   if (d_flattened_hierarchy == nullptr && rhs.d_flattened_hierarchy != nullptr) {
       result = false;
    }
-   if (d_flattened_hierarchy != 0 && rhs.d_flattened_hierarchy == 0) {
+   if (d_flattened_hierarchy != nullptr && rhs.d_flattened_hierarchy == nullptr) {
       result = false;
    }
-   if (d_item == 0 && rhs.d_item != 0) {
+   if (d_item == nullptr && rhs.d_item != nullptr) {
       result = false;
    }
-   if (d_item != 0 && rhs.d_item == 0) {
+   if (d_item != nullptr && rhs.d_item == nullptr) {
       result = false;
    }
    if (result) {
-      if (d_item == 0 && rhs.d_item == 0) {
+      if (d_item == nullptr && rhs.d_item == nullptr) {
          result = true;
       }
       if (d_item && rhs.d_item) {
@@ -314,10 +314,10 @@ UncoveredBoxIterator::incrementIterator()
          if (d_flattened_hierarchy && d_allocated_flattened_hierarchy) {
             delete d_flattened_hierarchy;
          }
-         d_flattened_hierarchy = 0;
+         d_flattened_hierarchy = nullptr;
          if (d_item) {
             delete d_item;
-            d_item = 0; 
+            d_item = nullptr; 
          }
       }
    }
@@ -365,15 +365,15 @@ UncoveredBoxIterator::findFirstUncoveredBox()
    } else {
       if (d_item) {
          delete d_item;
-         d_item = 0;
+         d_item = nullptr;
       }
       if (d_flattened_hierarchy && d_allocated_flattened_hierarchy) {
          delete d_flattened_hierarchy;
       }
-      d_flattened_hierarchy = 0;
+      d_flattened_hierarchy = nullptr;
       if (d_item) {
          delete d_item;
-         d_item = 0;
+         d_item = nullptr;
       }
    }
 }

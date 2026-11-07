@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Set of distributed box-graph relationships from one BoxLevel
  *                to another describing Box mappings.
  *
@@ -87,7 +87,7 @@ public:
    /*!
     * @brief Destructor.
     */
-   ~MappingConnector();
+   ~MappingConnector() = default;
 
    /*!
     * @brief Assignment operator

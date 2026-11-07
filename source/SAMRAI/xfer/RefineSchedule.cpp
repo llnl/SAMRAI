@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Refine schedule for data transfer between AMR levels
  *
  ************************************************************************/
@@ -4485,7 +4485,7 @@ RefineSchedule::constructScheduleTransactions(
    if (d_src_masks.size() < max_overlap_array_size) {
       for (int i = d_src_masks.size();
            i < max_overlap_array_size; ++i) {
-         d_src_masks.pushBack(hier::Box(dim));
+         d_src_masks.emplaceBack(dim);
       }
    }
 

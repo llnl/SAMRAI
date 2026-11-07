@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Fast assumed partition for a single box.
  *
  ************************************************************************/
@@ -55,7 +55,7 @@ public:
       bool interleave = false);
 
    /*!
-    * @brief Nearly default constructor.
+    * @brief Constructor.
     */
    AssumedPartitionBox(
       const tbox::Dimension& dim);
@@ -91,8 +91,7 @@ public:
    /*!
     * @brief Destructor.
     */
-   ~AssumedPartitionBox() {
-   }
+   ~AssumedPartitionBox() = default;
 
    //! @brief Return the original unpartitioned box.
    const Box& getUnpartitionedBox() const {

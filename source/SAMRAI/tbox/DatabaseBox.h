@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   A box structure representing a portion of the AMR index space
  *
  ************************************************************************/
@@ -14,6 +14,8 @@
 #include "SAMRAI/SAMRAI_config.h"
 
 #include "SAMRAI/tbox/Dimension.h"
+
+#include <array>
 
 namespace SAMRAI {
 namespace tbox {
@@ -27,8 +29,8 @@ namespace tbox {
  */
 struct DatabaseBox_POD {
    int d_dimension;
-   int d_lo[SAMRAI::MAX_DIM_VAL];
-   int d_hi[SAMRAI::MAX_DIM_VAL];
+   std::array<int, SAMRAI::MAX_DIM_VAL> d_lo;
+   std::array<int, SAMRAI::MAX_DIM_VAL> d_hi;
 };
 
 /**
@@ -52,7 +54,10 @@ public:
    /**
     * The default constructor creates a zero dimension empty box.
     */
-   DatabaseBox();
+   constexpr DatabaseBox()
+   : d_data{}
+   {
+   }
 
    /**
     * Create a box of the specified dimension describing the index space
@@ -66,43 +71,56 @@ public:
    /**
     * The copy constructor copies the index space of the argument box.
     */
-   DatabaseBox(
-      const DatabaseBox& box);
+   constexpr DatabaseBox(
+      const DatabaseBox& box) noexcept = default;
 
    /**
     * The assignment operator copies the index space of the argument box.
     */
-   DatabaseBox&
+   constexpr DatabaseBox&
    operator = (
-      const DatabaseBox& box);
+      const DatabaseBox& box) noexcept = default;
 
    /**
     * The destructor does nothing interesting.
     */
-   ~DatabaseBox();
+   ~DatabaseBox() = default;
 
    /**
     * Return whether the box is empty.  A box is empty if it has dimension
     * zero or if any part of the upper index is less than its corresponding
     * part of the lower index.
     */
-   bool
-   empty() const;
+   constexpr bool empty() const noexcept
+   {
+      if (d_data.d_dimension == 0) {
+         return true;
+      }
+      for (int i = 0; i < d_data.d_dimension; i++) {
+         if (d_data.d_hi[i] < d_data.d_lo[i]) {
+            return true;
+         }
+      }
+      return false;
+   }
 
    /**
     * Return the dimension of this object.
     */
-   Dimension::dir_t
-   getDimVal() const
+   constexpr Dimension::dir_t
+   getDimVal() const noexcept
    {
       return static_cast<Dimension::dir_t>(d_data.d_dimension);
    }
 
    void
    setDim(
-      const Dimension& dim)
+      const Dimension& dim) noexcept
    {
-      d_data.d_dimension = dim.getValue();
+      const int dim_val = dim.getValue();
+      TBOX_ASSERT(dim_val >= 0 && dim_val <= SAMRAI::MAX_DIM_VAL);
+
+      d_data.d_dimension = dim_val;
    }
 
    /**
@@ -112,7 +130,7 @@ public:
     */
    int&
    lower(
-      const int i)
+      const int i) noexcept
    {
       TBOX_ASSERT((i >= 0) && (i < getDimVal()));
       return d_data.d_lo[i];
@@ -125,7 +143,7 @@ public:
     */
    int&
    upper(
-      const int i)
+      const int i) noexcept
    {
       TBOX_ASSERT((i >= 0) && (i < getDimVal()));
       return d_data.d_hi[i];
@@ -136,11 +154,11 @@ public:
     *
     * @pre (i >= 0) && (i < getDimVal())
     */
-   int
+   constexpr int
    lower(
-      const int i) const
+      const int i) const noexcept
    {
-      TBOX_ASSERT((i >= 0) && (i < getDimVal()));
+      TBOX_CONSTEXPR_ASSERT((i >= 0) && (i < getDimVal()));
       return d_data.d_lo[i];
    }
 
@@ -149,20 +167,34 @@ public:
     *
     * @pre (i >= 0) && (i < getDimVal())
     */
-   int
+   constexpr int
    upper(
-      const int i) const
+      const int i) const noexcept
    {
-      TBOX_ASSERT((i >= 0) && (i < getDimVal()));
+      TBOX_CONSTEXPR_ASSERT((i >= 0) && (i < getDimVal()));
       return d_data.d_hi[i];
    }
 
    /**
     * Check whether two boxes represent the same portion of index space.
     */
-   int
+   constexpr bool
    operator == (
-      const DatabaseBox& box) const;
+      const DatabaseBox& box) const noexcept
+   {
+      const int dim = d_data.d_dimension;
+      if (dim != box.d_data.d_dimension) {
+         return false;
+      }
+
+      for (int i = 0; i < dim; ++i) {
+         if (d_data.d_lo[i] != box.d_data.d_lo[i] ||
+             d_data.d_hi[i] != box.d_data.d_hi[i]) {
+            return false;
+         }
+      }
+      return true;
+   }
 
    /**
     * @brief All data members in a POD type.

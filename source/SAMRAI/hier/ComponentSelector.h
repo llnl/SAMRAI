@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Simple bit vector.
  *
  ************************************************************************/
@@ -52,12 +52,15 @@ public:
     * to the argument.
     */
    ComponentSelector(
-      const ComponentSelector& flags);
+      const ComponentSelector& flags) = default;
+
+   ComponentSelector(
+      ComponentSelector&& flags) = default;
 
    /*!
     * @brief The destructor for a component selector does nothing interesting.
     */
-   ~ComponentSelector();
+   ~ComponentSelector() = default;
 
    /*!
     * @brief Get the size of the ComponentSelector.
@@ -65,7 +68,7 @@ public:
     * @return total number of flags (i.e., bits) in this component selector.
     */
    int
-   getSize() const
+   getSize() const noexcept
    {
       return static_cast<int>(d_bit_vector.size()) * C_BITSET_SIZE;
    }
@@ -75,12 +78,11 @@ public:
     */
    ComponentSelector&
    operator = (
-      const ComponentSelector& flags)
-   {
-      d_bit_vector = flags.d_bit_vector;
-      d_max_bit_index = flags.d_max_bit_index;
-      return *this;
-   }
+      const ComponentSelector& flags) = default;
+
+   ComponentSelector&
+   operator = (
+      ComponentSelector&& flags) = default;
 
    /*!
     * @brief Equality operator.  Two ComponentSelector objects are
@@ -88,7 +90,7 @@ public:
     */
    bool
    operator == (
-      const ComponentSelector& flags) const
+      const ComponentSelector& flags) const noexcept
    {
       return d_bit_vector == flags.d_bit_vector;
    }
@@ -99,7 +101,7 @@ public:
     */
    bool
    operator != (
-      const ComponentSelector& flags) const
+      const ComponentSelector& flags) const noexcept
    {
       return d_bit_vector != flags.d_bit_vector;
    }
@@ -178,7 +180,7 @@ public:
     */
    bool
    isSet(
-      const int i) const
+      const int i) const noexcept
    {
       TBOX_ASSERT(i >= 0);
       return i < getSize() && d_bit_vector[_index(i)].test(_element(i));
@@ -250,7 +252,7 @@ public:
     * @brief Get the index of the highest set position.
     */
    int
-   getMaxIndex() const
+   getMaxIndex() const noexcept
    {
       return d_max_bit_index;
    }
@@ -261,7 +263,7 @@ public:
     * @return True if any bit in the vector is set true, otherwise false.
     */
    bool
-   any() const;
+   any() const noexcept;
 
    /*!
     * @brief check if no bits in the vector are set to true.
@@ -271,7 +273,7 @@ public:
     * @return True if no bits in the vector are set to true, otherwise false.
     */
    bool
-   none() const
+   none() const noexcept
    {
       return !any();
    }
@@ -287,7 +289,7 @@ private:
    /*
     *  Default length of std::bitset entries used in bit vector representation.
     */
-   static const int C_BITSET_SIZE = 1024;
+   static constexpr int C_BITSET_SIZE = 1024;
 
    std::vector<std::bitset<C_BITSET_SIZE> > d_bit_vector;
 
@@ -297,20 +299,20 @@ private:
 
    int
    _findMaxIndex(
-      const std::vector<std::bitset<C_BITSET_SIZE> >& bits) const;
+      const std::vector<std::bitset<C_BITSET_SIZE> >& bits) const noexcept;
    // private function to return the index into the d_bit_vector
-   int
+   constexpr int
    _index(
-      const int i) const
+      const int i) const noexcept
    {
       return i / C_BITSET_SIZE;
    }
 
    // private function to return the element within the d_bit_vector[i]
    // bitset.
-   int
+   constexpr int
    _element(
-      const int i) const
+      const int i) const noexcept
    {
       return i % C_BITSET_SIZE;
    }

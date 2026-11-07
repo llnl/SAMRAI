@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Algorithms for working with overlap Connectors.
  *
  ************************************************************************/
@@ -707,7 +707,7 @@ OverlapConnectorAlgorithm::bridgeWithNesting(
       outgoing_ranks,
       visible_west_nabrs,
       visible_east_nabrs);
-   Connector* east_to_west = 0;
+   Connector* east_to_west = nullptr;
    west_to_east.reset(new Connector(west_to_cent.getBase(),
       cent_to_east.getHead(),
       west_to_east_width));
@@ -780,7 +780,7 @@ OverlapConnectorAlgorithm::bridge(
       outgoing_ranks,
       visible_west_nabrs,
       visible_east_nabrs);
-   Connector* east_to_west = 0;
+   Connector* east_to_west = nullptr;
    west_to_east.reset(new Connector(west_to_cent.getBase(),
       cent_to_east.getHead(),
       west_to_east_width));
@@ -853,7 +853,7 @@ OverlapConnectorAlgorithm::bridge(
       outgoing_ranks,
       visible_west_nabrs,
       visible_east_nabrs);
-   Connector* east_to_west = 0;
+   Connector* east_to_west = nullptr;
    west_to_east.reset(new Connector(west_to_cent.getBase(),
       cent_to_east.getHead(),
       west_to_east_width));

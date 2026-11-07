@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Set of edges incident from a box_level of a distributed box graph.
  *
  ************************************************************************/
@@ -36,15 +36,6 @@ PeriodicShiftCatalog::PeriodicShiftCatalog(
    d_zero_shift_number(0)
 {
    d_opposite_number[0] = 0;
-}
-
-/*
- ***********************************************************************
- ***********************************************************************
- */
-
-PeriodicShiftCatalog::~PeriodicShiftCatalog()
-{
 }
 
 /*

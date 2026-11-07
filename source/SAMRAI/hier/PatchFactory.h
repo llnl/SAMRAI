@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Abstract factory class for creating patch classes
  *
  ************************************************************************/
@@ -39,12 +39,12 @@ public:
    /**
     * Construct a patch factory object.
     */
-   PatchFactory();
+   PatchFactory() = default;
 
    /**
     * Virtual destructor for patch factory objects.
     */
-   virtual ~PatchFactory();
+   virtual ~PatchFactory() = default;
 
    /**
     * Allocate a patch with the specified domain and patch descriptor.
@@ -56,10 +56,10 @@ public:
 
 private:
    PatchFactory(
-      const PatchFactory&);             // not implemented
+      const PatchFactory&) = delete;
    PatchFactory&
    operator = (
-      const PatchFactory&);                     // not implemented
+      const PatchFactory&) = delete;
 
 };
 

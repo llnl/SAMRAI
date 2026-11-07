@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Algorithms to work with maping Connectors.
  *
  ************************************************************************/
@@ -26,12 +26,12 @@ protected:
    /*!
     * @brief Constructor
     */
-   BaseConnectorAlgorithm();
+   BaseConnectorAlgorithm() = default;
 
    /*!
     * @brief Destructor.
     */
-   virtual ~BaseConnectorAlgorithm();
+   virtual ~BaseConnectorAlgorithm() = default;
 
    /*!
     * @brief Set up communication objects for use in privateBridge/Modify.

@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Class for finding multiblockSingularities
  *
  ************************************************************************/
@@ -123,10 +123,6 @@ SingularityFinder::SingularityFinder(
  *
  * ************************************************************************
  */
-
-SingularityFinder::~SingularityFinder()
-{
-}
 
 /*
  * ************************************************************************
@@ -273,10 +269,10 @@ SingularityFinder::connect(const BoxId& id_a,
 
    int a = id_a.getLocalId().getValue();
    int b = id_b.getLocalId().getValue();
-   if (d_blocks[a].get() == 0) {
+   if (d_blocks[a].get() == nullptr) {
       d_blocks[a] = std::make_shared<Block>(d_dim);
    }
-   if (d_blocks[b].get() == 0) {
+   if (d_blocks[b].get() == nullptr) {
       d_blocks[b] = std::make_shared<Block>(d_dim);
    }
 
@@ -305,18 +301,18 @@ SingularityFinder::connect(const BoxId& id_a,
       std::shared_ptr<Edge>& edgea = d_blocks[a]->d_edge[e_itr->first];
       std::shared_ptr<Edge>& edgeb = d_blocks[b]->d_edge[e_itr->second];
 
-      if (edgea.get() == 0 && edgeb.get() == 0) {
+      if (edgea.get() == nullptr && edgeb.get() == nullptr) {
          edgea.reset(new Edge());
          edgeb = edgea;
          d_edges.push_back(edgea);
-      } else if (edgea.get() != 0 && edgeb.get() == 0) {
+      } else if (edgea.get() != nullptr && edgeb.get() == nullptr) {
          edgeb = edgea;
-      } else if (edgeb.get() != 0 && edgea.get() == 0) {
+      } else if (edgeb.get() != nullptr && edgea.get() == nullptr) {
          edgea = edgeb;
       } else if (edgea.get() == edgeb.get()) {
          // nothing needed
       } else {
-         TBOX_ASSERT(edgea.get() != 0 && edgeb.get() != 0);
+         TBOX_ASSERT(edgea.get() != nullptr && edgeb.get() != nullptr);
          for (std::set<int>::iterator b_itr = edgeb->d_blocks.begin();
               b_itr != edgeb->d_blocks.end(); ++b_itr) {
             edgea->d_blocks.insert(*b_itr);
@@ -355,18 +351,18 @@ SingularityFinder::connect(const BoxId& id_a,
       std::shared_ptr<Point>& pointa = d_blocks[a]->d_point[e_itr->first];
       std::shared_ptr<Point>& pointb = d_blocks[b]->d_point[e_itr->second];
 
-      if (pointa.get() == 0 && pointb.get() == 0) {
+      if (pointa.get() == nullptr && pointb.get() == nullptr) {
          pointa.reset(new Point());
          pointb = pointa;
          d_points.push_back(pointa);
-      } else if (pointa.get() != 0 && pointb.get() == 0) {
+      } else if (pointa.get() != nullptr && pointb.get() == nullptr) {
          pointb = pointa;
-      } else if (pointb.get() != 0 && pointa.get() == 0) {
+      } else if (pointb.get() != nullptr && pointa.get() == nullptr) {
          pointa = pointb;
       } else if (pointa.get() == pointb.get()) {
          // nothing needed
       } else {
-         TBOX_ASSERT(pointa.get() != 0 && pointb.get() != 0);
+         TBOX_ASSERT(pointa.get() != nullptr && pointb.get() != nullptr);
          for (std::set<int>::iterator b_itr = pointb->d_blocks.begin();
               b_itr != pointb->d_blocks.end(); ++b_itr) {
             pointa->d_blocks.insert(*b_itr);
@@ -414,7 +410,7 @@ SingularityFinder::findBoundaryFaces()
 
          std::shared_ptr<Face>& face = block->d_face[iface];
 
-         if (face.get() == 0) {
+         if (face.get() == nullptr) {
 
             face.reset(new Face());
             d_faces.push_back(face);

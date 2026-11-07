@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Blueprint utilities.
  *
  ************************************************************************/
@@ -54,7 +54,7 @@ public:
    /*!
     * @brief Destructor
     */
-   virtual ~BlueprintUtils();
+   virtual ~BlueprintUtils() = default;
 
    /*!
     * @brief Put topology and coordinates to the database
@@ -86,16 +86,43 @@ public:
     *
     * This overloaded version of the method includes a FlattenedHierarchy
     * argument to restrict the filling of coordinates to the finest available
-    * level of resulation as represented by the flattened version of the
+    * level of resolution as represented by the flattened version of the
     * hierarchy.
     *
     * @param blueprint_db    Top-level blueprint database holding all local
     *                        domain information
     * @param hierarchy       The full AMR hierarchy being described
     * @param flat_hierarchy  The flattened version of the AMR hierarchy.  
-    * @param topology_name Name of the topology
+    * @param topology_name   Name of the topology
     */
    void putTopologyAndCoordinatesToDatabase(
+      const std::shared_ptr<tbox::Database>& blueprint_db,
+      const PatchHierarchy& hierarchy,
+      const FlattenedHierarchy& flat_hierarchy,
+      const std::string& topology_name) const;
+
+   /*!
+    * @brief Put fields to the database
+    *
+    * Using the BlueprintUtilsStrategy given to the constructor of this
+    * object, this loops over a hierarchy and calls back to user code to
+    * add fields data to the mesh in the blueprint_db, according to
+    * Blueprint schema defined by conduit.
+    *
+    * The fields will be associated with the topology identified by the
+    * topology_name string.
+    *
+    * The FlattenedHierarchy argument restricts the filling of field data
+    * to the finest level of resolution as represented by the flattened
+    * version of the hierarchy.
+    *
+    * @param blueprint_db    Top-level blueprint database holding all local
+    *                        domain information
+    * @param hierarchy       The full AMR hierarchy being described
+    * @param flat_hierarchy  The flattened version of the AMR hierarchy.  
+    * @param topology_name   Name of the topology
+    */
+   void putFieldsToDatabase(
       const std::shared_ptr<tbox::Database>& blueprint_db,
       const PatchHierarchy& hierarchy,
       const FlattenedHierarchy& flat_hierarchy,
@@ -132,9 +159,21 @@ public:
       const std::string& rootfile_name,
       const std::string& io_protocol) const;
 
+   void setTopologyName(const std::string& topo_name)
+   {
+      m_topology_name = topo_name;
+   }
+
+   const std::string& getTopologyName() const
+   {
+      return m_topology_name;
+   }
+
 private:
 
    BlueprintUtilsStrategy* d_strategy;
+
+   std::string m_topology_name = "mesh";
 
 };
 

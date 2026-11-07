@@ -1,7 +1,7 @@
 set(CMAKE_CXX_COMPILER "/usr/tce/packages/gcc/gcc-10.3.1/bin/g++" CACHE PATH "")
 set(CMAKE_C_COMPILER "/usr/tce/packages/gcc/gcc-10.3.1/bin/gcc" CACHE PATH "")
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING "")
-set(BLT_CXX_STD "c++17" CACHE STRING "")
+set(BLT_CXX_STD "c++20" CACHE STRING "")
 set(ENABLE_TESTS Off CACHE BOOL "")
 set(ENABLE_CLANG_CUDA Off CACHE BOOL "")
 set(ENABLE_CUDA Off CACHE BOOL "")

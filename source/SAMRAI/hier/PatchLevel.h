@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   A collection of patches at one level of the AMR hierarchy
  *
  ************************************************************************/
@@ -172,7 +172,7 @@ public:
    /*!
     * @brief The virtual destructor for patch level deallocates all patches.
     */
-   virtual ~PatchLevel();
+   virtual ~PatchLevel() = default;
 
    /*!
     * @brief Get the level number

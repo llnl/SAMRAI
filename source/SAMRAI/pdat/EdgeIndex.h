@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   hier
  *
  ************************************************************************/
@@ -126,6 +126,22 @@ public:
    }
 
    /**
+    * Plus-equals operator for a edge index and an edge index.
+    *
+    * @pre getDim() == rhs.getDim()
+    * @pre getAxis() == rhs.getAxis()
+    */
+   EdgeIndex&
+   operator += (
+      const EdgeIndex& rhs)
+   {
+      TBOX_ASSERT_OBJDIM_EQUALITY2(*this, rhs);
+      TBOX_ASSERT(d_axis == rhs.d_axis);
+      hier::Index::operator += (rhs);
+      return *this;
+   }
+
+   /**
     * Plus operator for a edge index and an integer vector.
     *
     * @pre getDim() == rhs.getDim()
@@ -135,6 +151,23 @@ public:
       const hier::IntVector& rhs) const
    {
       TBOX_ASSERT_OBJDIM_EQUALITY2(*this, rhs);
+      EdgeIndex tmp = *this;
+      tmp += rhs;
+      return tmp;
+   }
+
+   /**
+    * Plus operator for a edge index and an edge index.
+    *
+    * @pre getDim() == rhs.getDim()
+    * @pre getAxis() == rhs.getAxis()
+    */
+   EdgeIndex
+   operator + (
+      const EdgeIndex& rhs) const
+   {
+      TBOX_ASSERT_OBJDIM_EQUALITY2(*this, rhs);
+      TBOX_ASSERT(d_axis == rhs.d_axis);
       EdgeIndex tmp = *this;
       tmp += rhs;
       return tmp;
@@ -187,6 +220,39 @@ public:
       const hier::IntVector& rhs) const
    {
       TBOX_ASSERT_OBJDIM_EQUALITY2(*this, rhs);
+      EdgeIndex tmp = *this;
+      tmp -= rhs;
+      return tmp;
+   }
+
+   /**
+    * Minus-equals operator for a edge index and an edge index.
+    *
+    * @pre getDim() == rhs.getDim()
+    * @pre getAxis() == rhs.getAxis()
+    */
+   EdgeIndex&
+   operator -= (
+      const EdgeIndex& rhs)
+   {
+      TBOX_ASSERT_OBJDIM_EQUALITY2(*this, rhs);
+      TBOX_ASSERT(d_axis == rhs.d_axis);
+      hier::Index::operator -= (rhs);
+      return *this;
+   }
+
+   /**
+    * Minus operator for a edge index and an edge index.
+    *
+    * @pre getDim() == rhs.getDim()
+    * @pre getAxis() == rhs.getAxis()
+    */
+   EdgeIndex
+   operator - (
+      const EdgeIndex& rhs) const
+   {
+      TBOX_ASSERT_OBJDIM_EQUALITY2(*this, rhs);
+      TBOX_ASSERT(d_axis == rhs.d_axis);
       EdgeIndex tmp = *this;
       tmp -= rhs;
       return tmp;

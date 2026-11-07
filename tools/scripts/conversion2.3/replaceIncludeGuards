@@ -2,7 +2,7 @@
 ##
 ## File:        $URL: file:///usr/casc/samrai/repository/SAMRAI/trunk/source/scripts/source_manipulation/replaceIncludeGuards $
 ## Package:     SAMRAI scripts
-## Copyright:   (c) 1997-2025 Lawrence Livermore National Security, LLC
+## Copyright:   (c) 1997-2026 Lawrence Livermore National Security, LLC
 ## Revision:    $LastChangedRevision: 1917 $
 ## Description: shell script to convert 1.x codes to 2.0
 ##

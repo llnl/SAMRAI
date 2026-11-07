@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Factory abstract base class for creating patch data objects
  *
  ************************************************************************/
@@ -19,10 +19,6 @@ PatchDataFactory::PatchDataFactory(
    d_ghosts(ghosts)
 {
    TBOX_ASSERT(ghosts.min() >= 0);
-}
-
-PatchDataFactory::~PatchDataFactory()
-{
 }
 
 /**********************************************************************

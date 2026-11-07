@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Scalable load balancer using tree algorithm.
  *
  ************************************************************************/
@@ -750,8 +750,19 @@ CascadePartitionerTree::computeConnectorUpdateInterval() const
    const double fanout_size = d_common->d_global_work_avg >
       d_common->d_pparams->getLoadComparisonTol() ?
       d_common->d_local_work_max / d_common->d_global_work_avg : 1.0;
-   const int number_of_updates =
-      static_cast<int>(ceil(log(fanout_size) / log(static_cast<double>(d_common->d_max_spread_procs))));
+
+   /*
+    * Set default number_of_updates to 1, because if fanout_size == 1.0,
+    * then the computed number_of_updates will be 0, which would cause
+    * a divide by 0.
+    */
+   int number_of_updates = 1;
+   if (fanout_size > 1.0 && d_common->d_max_spread_procs > 1) {
+      number_of_updates =
+         static_cast<int>(ceil(log(fanout_size) / log(static_cast<double>(d_common->d_max_spread_procs))));
+   }
+   TBOX_ASSERT(number_of_updates > 0);
+
    const int tree_depth = CascadePartitioner::lgInt(d_common->d_mpi.getSize());
    const double update_interval = static_cast<double>(tree_depth) / number_of_updates;
    if (d_common->d_print_steps) {

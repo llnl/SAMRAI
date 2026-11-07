@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Factory class for patch data objects that live on a patch
  *
  ************************************************************************/
@@ -242,10 +242,10 @@ private:
    static const int INDEX_UNDEFINED;
 
    PatchDescriptor(
-      const PatchDescriptor&);                  // not implemented
+      const PatchDescriptor&) = delete;
    PatchDescriptor&
    operator = (
-      const PatchDescriptor&);                  // not implemented
+      const PatchDescriptor&) = delete;
 
    int d_max_number_registered_components;
    std::vector<std::string> d_names;

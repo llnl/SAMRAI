@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Utilities for working on DLBG edges.
  *
  ************************************************************************/
@@ -47,14 +47,6 @@ BoxLevelConnectorUtils::BoxLevelConnectorUtils():
 {
    getFromInput();
    setTimerPrefix(s_default_timer_prefix);
-}
-
-/*
- ***********************************************************************
- ***********************************************************************
- */
-BoxLevelConnectorUtils::~BoxLevelConnectorUtils()
-{
 }
 
 /*

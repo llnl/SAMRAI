@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Load balance routines for uniform and non-uniform workloads.
  *
  ************************************************************************/
@@ -1038,7 +1038,7 @@ ChopAndPackLoadBalancer::exchangeBoxContainersAndWeightArrays(
    int curr_box_list_out_size = box_list_out.size();
    if (size_out > curr_box_list_out_size) {
       for (int i = curr_box_list_out_size; i < size_out; ++i) {
-         box_list_out.pushBack(hier::Box(d_dim));
+         box_list_out.emplaceBack(d_dim);
       }
    } else if (size_out < curr_box_list_out_size) {
       for (int i = size_out; i < curr_box_list_out_size; ++i) {

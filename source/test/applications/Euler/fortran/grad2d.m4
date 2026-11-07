@@ -2,7 +2,7 @@ c
 c This file is part of the SAMRAI distribution.  For full copyright
 c information, see COPYRIGHT and LICENSE.
 c
-c Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+c Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
 c Description:   F77 routines to compute gradients for 2d euler equations.
 c
 define(NDIM,2)dnl

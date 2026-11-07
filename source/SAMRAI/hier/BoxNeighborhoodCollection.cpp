@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   A class describing the adjacency of Boxes.
  *
  ************************************************************************/
@@ -14,10 +14,6 @@ namespace SAMRAI {
 namespace hier {
 
 const int BoxNeighborhoodCollection::HIER_BOX_NBRHD_COLLECTION_VERSION = 0;
-
-BoxNeighborhoodCollection::BoxNeighborhoodCollection()
-{
-}
 
 BoxNeighborhoodCollection::BoxNeighborhoodCollection(
    const BoxContainer& base_boxes)
@@ -42,10 +38,6 @@ BoxNeighborhoodCollection::BoxNeighborhoodCollection(
          insert(new_base_box, *nbr_itr);
       }
    }
-}
-
-BoxNeighborhoodCollection::~BoxNeighborhoodCollection()
-{
 }
 
 BoxNeighborhoodCollection&
@@ -813,18 +805,6 @@ BoxNeighborhoodCollection::Iterator::Iterator(
 {
 }
 
-BoxNeighborhoodCollection::Iterator::Iterator(
-   const Iterator& other):
-   d_collection(other.d_collection),
-   d_itr(other.d_itr),
-   d_base_boxes_itr(other.d_base_boxes_itr)
-{
-}
-
-BoxNeighborhoodCollection::Iterator::~Iterator()
-{
-}
-
 BoxNeighborhoodCollection::ConstIterator::ConstIterator(
    const BoxNeighborhoodCollection& nbrhds,
    bool from_start):
@@ -846,22 +826,10 @@ BoxNeighborhoodCollection::ConstIterator::ConstIterator(
 }
 
 BoxNeighborhoodCollection::ConstIterator::ConstIterator(
-   const ConstIterator& other):
-   d_collection(other.d_collection),
-   d_itr(other.d_itr),
-   d_base_boxes_itr(other.d_base_boxes_itr)
-{
-}
-
-BoxNeighborhoodCollection::ConstIterator::ConstIterator(
    const Iterator& other):
    d_collection(other.d_collection),
    d_itr(other.d_itr),
    d_base_boxes_itr(other.d_base_boxes_itr)
-{
-}
-
-BoxNeighborhoodCollection::ConstIterator::~ConstIterator()
 {
 }
 
@@ -872,18 +840,6 @@ BoxNeighborhoodCollection::NeighborIterator::NeighborIterator(
    d_base_box(base_box_itr.d_itr->first),
    d_itr(from_start ? base_box_itr.d_itr->second.begin() :
          base_box_itr.d_itr->second.end())
-{
-}
-
-BoxNeighborhoodCollection::NeighborIterator::NeighborIterator(
-   const NeighborIterator& other):
-   d_collection(other.d_collection),
-   d_base_box(other.d_base_box),
-   d_itr(other.d_itr)
-{
-}
-
-BoxNeighborhoodCollection::NeighborIterator::~NeighborIterator()
 {
 }
 
@@ -898,22 +854,10 @@ BoxNeighborhoodCollection::ConstNeighborIterator::ConstNeighborIterator(
 }
 
 BoxNeighborhoodCollection::ConstNeighborIterator::ConstNeighborIterator(
-   const ConstNeighborIterator& other):
-   d_collection(other.d_collection),
-   d_base_box(other.d_base_box),
-   d_itr(other.d_itr)
-{
-}
-
-BoxNeighborhoodCollection::ConstNeighborIterator::ConstNeighborIterator(
    const NeighborIterator& other):
    d_collection(other.d_collection),
    d_base_box(other.d_base_box),
    d_itr(other.d_itr)
-{
-}
-
-BoxNeighborhoodCollection::ConstNeighborIterator::~ConstNeighborIterator()
 {
 }
 

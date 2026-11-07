@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Generator of sequential LocalIds.
  *
  ************************************************************************/
@@ -55,8 +55,7 @@ public:
    /*!
     * @brief Destructor.
     */
-   ~SequentialLocalIdGenerator() {
-   }
+   ~SequentialLocalIdGenerator() = default;
 
    /*!
     * @brief Return a LocalId that is greater than the previous

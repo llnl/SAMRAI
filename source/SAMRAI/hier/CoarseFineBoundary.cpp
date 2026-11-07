@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   For describing coarse-fine boundary interfaces
  *
  ************************************************************************/
@@ -113,10 +113,6 @@ CoarseFineBoundary::CoarseFineBoundary(
       level_to_level,
       max_ghost_width);
 
-}
-
-CoarseFineBoundary::~CoarseFineBoundary()
-{
 }
 
 /*

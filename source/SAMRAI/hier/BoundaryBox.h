@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   Box representing a portion of the AMR index space
  *
  ************************************************************************/
@@ -76,12 +76,15 @@ public:
     * @param[in] boundary_box
     */
    BoundaryBox(
-      const BoundaryBox& boundary_box);
+      const BoundaryBox& boundary_box) = default;
+
+   BoundaryBox(
+      BoundaryBox&& boundary_box) = default;
 
    /*!
     * @brief The destructor for BoundaryBox.
     */
-   ~BoundaryBox();
+   ~BoundaryBox() = default;
 
    /*!
     * @brief Return the Box member of the boundary box

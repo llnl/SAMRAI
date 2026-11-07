@@ -3,7 +3,7 @@
  * This file is part of the SAMRAI distribution.  For full copyright
  * information, see COPYRIGHT and LICENSE.
  *
- * Copyright:     (c) 1997-2025 Lawrence Livermore National Security, LLC
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
  * Description:   An restart manager singleton class
  *
  ************************************************************************/
@@ -100,22 +100,22 @@ private:
     * The constructor for PatchDataRestartManager initializes the root
     * data base to a NullDatabase and sets the restart flag to false.
     */
-   PatchDataRestartManager();
+   PatchDataRestartManager() = default;
 
    /**
     * The destructor for the restart manager is protected, since only the
     * singleton class and subclasses may destroy the manager objects.
     */
-   ~PatchDataRestartManager();
+   ~PatchDataRestartManager() = default;
 
    // Unimplemented copy constructor.
    PatchDataRestartManager(
-      const PatchDataRestartManager& other);
+      const PatchDataRestartManager& other) = delete;
 
    // Unimplemented assignment operator.
    PatchDataRestartManager&
    operator = (
-      const PatchDataRestartManager& rhs);
+      const PatchDataRestartManager& rhs) = delete;
 
    /**
     * Deallocate the restart manager instance.  It is not necessary to call
