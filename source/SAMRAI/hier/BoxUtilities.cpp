@@ -1622,15 +1622,17 @@ BoxUtilities::fixBadCutPointsForDirection(
 
                   if (try_cut >= (below + min)) {
                      found_good_cut = true;
+                     // cuthi was the erased cutlo: the new cut replaces it
                      if (tmplo != cuts.end()) {
                         std::list<int>::iterator tmp = tmplo;
                         ++tmp;
-                        cuts.insert(tmp, try_cut);
+                        cuthi = cuts.insert(tmp, try_cut);
                         cutlo = tmplo;
                         ++cutlo;
                      } else {
                         cuts.push_front(try_cut);
                         cutlo = cuts.begin();
+                        cuthi = cutlo;
                      }
                      ++cutlo;
                   } else {
@@ -1714,6 +1716,10 @@ BoxUtilities::fixBadCutPointsForDirection(
                   bad_cut_val = *cuthi;
                   std::list<int>::iterator tmphi = cuthi;
                   ++tmphi;
+                  // ++cutlo above may have reached cuthi, the erase would leave it dangling
+                  if (cutlo == cuthi) {
+                     cutlo = tmphi;
+                  }
                   cuts.erase(cuthi);
 
                   above = (tmphi != cuts.end() ? *tmphi : ihi);
