@@ -12,14 +12,14 @@ simplifies the exploration of SAMR methods in new application domains.
 
 ## New Release
 
-The current release is SAMRAI v. 4.0.1.  With the version 4 release, the
+The current release is SAMRAI v. 4.0.1. With the version 4 release, the
 SAMRAI project is pleased to introduce new features that support running
 applications on GPU-based architectures, using capabilities provided by the
 Umpire and RAJA libraries.
 
 ## Get Involved
 
-SAMRAI is an open source project, and questions, discussion and contributions
+SAMRAI is an open-source project, and questions, discussion, and contributions
 are welcome!
 
 ### Mailing List
@@ -29,15 +29,15 @@ To get in touch with all the SAMRAI developers, please email samrai@llnl.gov
 ### Contributions
 
 Contributing to SAMRAI should be easy! We are managing contributions through
-pull requents here on GitHub. When you create your pull request, please make
-`master` the target branch.
+pull requests here on GitHub. When you create your pull request, please set
+the target branch to `master`.
 
 Your PR must pass all of SAMRAI's unit tests, which are enforced using Travis
 CI. For information on how to run these tests locally, please see our
-[contribution guidelines](CONTRIBUTING.md)
+[contribution guidelines](CONTRIBUTING.md).
 
 The `master` branch contains the latest development, and releases are tagged.
-New features should be created in `feature/<name>`branches and be based on
+New features should be developed in `feature/<name>` branches, based on
 `master`.
 
 ## Citing SAMRAI
