@@ -1683,7 +1683,7 @@ BoxUtilities::fixBadCutPointsForDirection(
                      if (tmplo != cuts.end()) {
                         std::list<int>::iterator tmp = tmplo;
                         ++tmp;
-                        cuts.insert(tmplo, try_cut);
+                        cuts.insert(tmp, try_cut);
                         cutlo = tmplo;
                         ++cutlo;
                      } else {

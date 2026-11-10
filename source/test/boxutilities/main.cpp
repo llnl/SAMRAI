@@ -105,6 +105,10 @@ int main(
          18, {6, 12}, {6}, 1, 1, {5, 12});
 
       fail_count += testCutPoints(
+         "lower bad cut replaced after predecessor with distinct upper cut",
+         15, {3, 6, 9, 12}, {6}, 1, 1, {3, 5, 9, 12});
+
+      fail_count += testCutPoints(
          "first bad cut removed with upper cut retained",
          18, {6, 12}, {6}, 6, 1, {12});
 
