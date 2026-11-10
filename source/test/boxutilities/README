@@ -1,0 +1,11 @@
+BoxUtilities unit test
+======================
+
+This single-process test calls BoxUtilities::fixBadCutPointsForDirection()
+with controlled cut lists and bad-cut masks, checking the exact resulting
+cut lists.  Cases cover empty lists, unchanged cuts, lower and upper
+replacements, removal of all cuts, iterator aliasing, and cut-factor
+alignment with a rounded minimum size.
+
+The test uses one MPI task in MPI-enabled builds and runs directly otherwise.
+No input file is needed.
