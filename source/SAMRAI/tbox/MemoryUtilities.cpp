@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <vector>
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
@@ -58,26 +59,41 @@ MemoryUtilities::printMemoryInfo(
 {
    NULL_USE(os);
 
-#ifdef HAVE_MALLINFO
+#if defined(HAVE_MALLINFO2) || defined(HAVE_MALLINFO)
    /*
     * NOTE: This was taken directly from John Gyllenhal...
     */
 
-   /* Get malloc info structure */
+   /*
+    * Get malloc info structure.  mallinfo2() has size_t fields; the
+    * older mallinfo() has int fields, which wrap around above 2 GiB.
+    */
+#ifdef HAVE_MALLINFO2
+   struct mallinfo2 my_mallinfo = mallinfo2();
+#else
    struct mallinfo my_mallinfo = mallinfo();
+#endif
+
+   /*
+    * Each field is converted to double before summing so that the sums
+    * cannot overflow the integer type of the fields.
+    */
 
    /* Get total memory reserved by the system for malloc currently*/
-   double reserved_mem = my_mallinfo.arena;
+   double reserved_mem = static_cast<double>(my_mallinfo.arena);
 
    /* Get all the memory currently allocated to user by malloc, etc. */
-   double used_mem = my_mallinfo.hblkhd + my_mallinfo.usmblks
-      + my_mallinfo.uordblks;
+   double used_mem = static_cast<double>(my_mallinfo.hblkhd)
+      + static_cast<double>(my_mallinfo.usmblks)
+      + static_cast<double>(my_mallinfo.uordblks);
 
    /* Get memory not currently allocated to user but malloc controls */
-   double free_mem = my_mallinfo.fsmblks + my_mallinfo.fordblks;
+   double free_mem = static_cast<double>(my_mallinfo.fsmblks)
+      + static_cast<double>(my_mallinfo.fordblks);
 
    /* Get number of items currently allocated */
-   double number_allocated = my_mallinfo.ordblks + my_mallinfo.smblks;
+   double number_allocated = static_cast<double>(my_mallinfo.ordblks)
+      + static_cast<double>(my_mallinfo.smblks);
 
    /* Record high-water mark for memory used. */
    s_max_memory = MathUtilities<double>::Max(s_max_memory, used_mem);
@@ -107,26 +123,26 @@ MemoryUtilities::printMaxMemory(
 {
    const SAMRAI_MPI& mpi(SAMRAI_MPI::getSAMRAIWorld());
    /*
-    * Step through all nodes (>0) and send max memory to processor 0,
-    * which subsequently writes it out.
+    * Gather the high-water mark of every processor on processor 0,
+    * which subsequently writes them out.  The values are in bytes and
+    * are kept as double since they can exceed the range of int.
     */
-   int maxmem = 0;
-   int len = 1;
-   SAMRAI_MPI::Status status;
-   for (int p = 0; p < mpi.getSize(); ++p) {
-      if (mpi.getSize() > 1) {
-         if (mpi.getRank() == p) {
-            maxmem = static_cast<int>(s_max_memory);
-            mpi.Send(&maxmem, len, MPI_INT, 0, 0);
-         }
-         if (mpi.getRank() == 0) {
-            mpi.Recv(&maxmem, len, MPI_INT, p, 0, &status);
-         }
-      }
-      os << "Maximum memory used on processor " << p
-         << ": " << maxmem / (1024. * 1024.) << " MB" << std::endl;
+   const int nprocs = mpi.getSize();
+   std::vector<double> maxmem(nprocs, 0.);
+   double local_maxmem = s_max_memory;
+   if (SAMRAI_MPI::usingMPI() && nprocs > 1) {
+      mpi.Gather(&local_maxmem, 1, MPI_DOUBLE,
+         maxmem.data(), 1, MPI_DOUBLE, 0);
+   } else {
+      maxmem[0] = local_maxmem;
    }
 
+   if (mpi.getRank() == 0) {
+      for (int p = 0; p < nprocs; ++p) {
+         os << "Maximum memory used on processor " << p
+            << ": " << maxmem[p] / (1024. * 1024.) << " MB" << std::endl;
+      }
+   }
 }
 
 size_t

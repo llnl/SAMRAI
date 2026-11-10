@@ -45,6 +45,9 @@ check_cxx_source_compiles("int test = std::isnan(0.0)" HAVE_ISNAN)
 #HAVE_MALLINFO
 check_function_exists(mallinfo HAVE_MALLINFO)
 
+#HAVE_MALLINFO2
+check_function_exists(mallinfo2 HAVE_MALLINFO2)
+
 #HAVE_MALLOC_H
 check_include_files(malloc.h HAVE_MALLOC_H)
 

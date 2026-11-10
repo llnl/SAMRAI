@@ -24,9 +24,9 @@ namespace tbox {
  * @brief Class MemoryUtilities provides utility methods for memory usage and
  * misc memory utilities.
  *
- * "printMemoryInfo()" which does a simple dump of the current memory
- * usage on a processor, and "recordMemoryInfo()" which records the
- * memory for post-process analysis.
+ * "printMemoryInfo()" does a simple dump of the current memory usage on
+ * a processor and records the high-water mark, and "printMaxMemory()"
+ * prints that high-water mark for every processor.
  *
  * Calls to these methods may be placed at various points in an application
  * to track memory usage characteristics.  For applications running on a
@@ -48,6 +48,9 @@ struct MemoryUtilities {
    /*!
     * Print maximum memory used (i.e. high-water mark) to the
     * supplied output stream.
+    *
+    * This is a collective call over the SAMRAI world communicator; only
+    * processor 0 writes, one line per processor.
     */
    static void
    printMaxMemory(

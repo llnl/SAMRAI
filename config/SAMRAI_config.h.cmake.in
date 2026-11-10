@@ -107,7 +107,10 @@
 #undef HAVE_LIBZ
 
 /* Define if you have the 'mallinfo' function. */
-#undef HAVE_MALLINFO
+#cmakedefine HAVE_MALLINFO
+
+/* Define if you have the 'mallinfo2' function (glibc >= 2.33). */
+#cmakedefine HAVE_MALLINFO2
 
 /* HAVE_MALLOC_H */
 #cmakedefine HAVE_MALLOC_H

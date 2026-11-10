@@ -1,0 +1,32 @@
+#########################################################################
+##
+## This file is part of the SAMRAI distribution.  For full copyright
+## information, see COPYRIGHT and LICENSE.
+##
+## Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
+## Description:   Test of MemoryUtilities memory reporting
+##
+#########################################################################
+
+This is a test of MemoryUtilities::printMemoryInfo and
+MemoryUtilities::printMaxMemory.  Each processor allocates a buffer and
+the test checks that processor 0 reports, for every processor, a
+maximum memory at least as large as that buffer.
+
+The files included in this directory are as follows:
+
+   main.cpp       -  code for the test
+
+COMPILATION AND EXECUTION
+-------------------------
+   Compilation:
+      make memory_utilities
+
+   Execution:
+      make test
+
+INPUT PARAMETERS
+----------------
+An optional first argument gives the buffer size in MiB (default 64).
+A value above 2048 checks that memory beyond the range of int is
+reported correctly.
