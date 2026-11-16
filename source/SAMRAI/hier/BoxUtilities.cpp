@@ -17,6 +17,7 @@
 #include "SAMRAI/tbox/Utilities.h"
 #include "SAMRAI/tbox/MathUtilities.h"
 
+#include <iterator>
 #include <vector>
 
 namespace SAMRAI {
@@ -1589,10 +1590,7 @@ BoxUtilities::fixBadCutPointsForDirection(
          const int ilo = box.lower(id);
          const int ihi = box.upper(id) + 1;
 
-         int foo = 0;
-         std::list<int>::iterator cuthi = cuts.insert(cuts.end(), foo);
-         --cuthi;
-         cuts.pop_back();
+         std::list<int>::iterator cuthi = std::prev(cuts.end());
 
          while (cutlo != cuts.end() && cuthi != cuts.end() &&
                 (*cutlo <= *cuthi)) {
@@ -1606,9 +1604,9 @@ BoxUtilities::fixBadCutPointsForDirection(
                   bool found_good_cut = false;
 
                   bad_cut_val = *cutlo;
-                  std::list<int>::iterator tmplo = cutlo;
+                  std::list<int>::iterator tmplo =
+                     (cutlo == cuts.begin() ? cuts.end() : std::prev(cutlo));
                   std::list<int>::iterator tmphi = cutlo;
-                  --tmplo;
                   ++tmphi;
                   cuts.erase(cutlo);
 
@@ -1622,15 +1620,17 @@ BoxUtilities::fixBadCutPointsForDirection(
 
                   if (try_cut >= (below + min)) {
                      found_good_cut = true;
+                     // cuthi was the erased cutlo: the new cut replaces it
                      if (tmplo != cuts.end()) {
                         std::list<int>::iterator tmp = tmplo;
                         ++tmp;
-                        cuts.insert(tmp, try_cut);
+                        cuthi = cuts.insert(tmp, try_cut);
                         cutlo = tmplo;
                         ++cutlo;
                      } else {
                         cuts.push_front(try_cut);
                         cutlo = cuts.begin();
+                        cuthi = cutlo;
                      }
                      ++cutlo;
                   } else {
@@ -1647,14 +1647,9 @@ BoxUtilities::fixBadCutPointsForDirection(
                      }
 
                      if (try_cut <= (above - min)) {
-                        if (tmphi != cuts.end()) {
-                           cuts.insert(tmphi, try_cut);
-                           cuthi = tmphi;
-                           --cuthi;
-                        } else {
-                           cuthi = cuts.insert(cuts.end(), try_cut);
-                        }
-                        --cuthi;
+                        cuthi = cuts.insert(tmphi, try_cut);
+                        cuthi = (cuthi == cuts.begin() ?
+                           cuts.end() : std::prev(cuthi));
                      } else {
                         cuthi = tmplo;
                      }
@@ -1672,8 +1667,8 @@ BoxUtilities::fixBadCutPointsForDirection(
                if (bad_cuts[*cutlo - offset]) {
 
                   bad_cut_val = *cutlo;
-                  std::list<int>::iterator tmplo = cutlo;
-                  --tmplo;
+                  std::list<int>::iterator tmplo =
+                     (cutlo == cuts.begin() ? cuts.end() : std::prev(cutlo));
                   cuts.erase(cutlo);
 
                   below = (tmplo != cuts.end() ? *tmplo : ilo);
@@ -1688,7 +1683,7 @@ BoxUtilities::fixBadCutPointsForDirection(
                      if (tmplo != cuts.end()) {
                         std::list<int>::iterator tmp = tmplo;
                         ++tmp;
-                        cuts.insert(tmplo, try_cut);
+                        cuts.insert(tmp, try_cut);
                         cutlo = tmplo;
                         ++cutlo;
                      } else {
@@ -1714,6 +1709,10 @@ BoxUtilities::fixBadCutPointsForDirection(
                   bad_cut_val = *cuthi;
                   std::list<int>::iterator tmphi = cuthi;
                   ++tmphi;
+                  // ++cutlo above may have reached cuthi, the erase would leave it dangling
+                  if (cutlo == cuthi) {
+                     cutlo = tmphi;
+                  }
                   cuts.erase(cuthi);
 
                   above = (tmphi != cuts.end() ? *tmphi : ihi);
@@ -1725,27 +1724,22 @@ BoxUtilities::fixBadCutPointsForDirection(
                   }
 
                   if (try_cut <= (above - min)) {
-                     if (tmphi != cuts.end()) {
-                        cuts.insert(tmphi, try_cut);
-                        cuthi = tmphi;
-                        --cuthi;
-                     } else {
-                        cuthi = cuts.insert(cuts.end(), try_cut);
-                     }
-                     --cuthi;
+                     cuthi = cuts.insert(tmphi, try_cut);
+                     cuthi = (cuthi == cuts.begin() ?
+                        cuts.end() : std::prev(cuthi));
                   } else {
                      if (tmphi != cuts.end()) {
-                        cuthi = tmphi;
-                        --cuthi;
+                        cuthi = (tmphi == cuts.begin() ?
+                           cuts.end() : std::prev(tmphi));
                      } else {
-                        cuthi = cuts.insert(cuts.end(), foo);
-                        --cuthi;
-                        cuts.pop_back();
+                        cuthi = (cuts.empty() ?
+                           cuts.end() : std::prev(cuts.end()));
                      }
                   }
 
                } else {
-                  --cuthi;
+                  cuthi = (cuthi == cuts.begin() ?
+                     cuts.end() : std::prev(cuthi));
                }
 
             }
