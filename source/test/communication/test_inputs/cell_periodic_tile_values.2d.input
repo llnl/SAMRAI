@@ -1,0 +1,108 @@
+/*************************************************************************
+ *
+ * This file is part of the SAMRAI distribution.  For full copyright
+ * information, see COPYRIGHT and LICENSE.
+ *
+ * Copyright:     (c) 1997-2026 Lawrence Livermore National Security, LLC
+ * Description:   same hierarchy as cell_periodic_tile.2d.input, but the
+ *                communication schedules are built from the Connectors
+ *                left by gridding instead of fresh ones, and data are
+ *                checked instead of Connectors.  With 2 or more
+ *                processes, the cached Connectors used to miss periodic
+ *                neighbors, so that periodic ghosts could not be filled
+ *                from the same level (GitHub issue #311).
+ *
+ ************************************************************************/
+
+GlobalInputs {
+   call_abort_in_serial_instead_of_exit = FALSE
+}
+
+Main {
+   dim = 2
+   base_name  = "cell_periodic_tile_values.2d"
+   log_all_nodes  = TRUE
+   ntimes_run = 1
+   test_to_run = "CellDataTest"
+   do_refine = TRUE
+   refine_option = "INTERIOR_FROM_SAME_LEVEL"
+   do_coarsen = FALSE
+   clear_persistent_connectors = FALSE
+}
+
+TimerManager {
+}
+
+CellPatchDataTest {
+   Acoef = 2.1
+   Bcoef = 3.2
+   Ccoef = 4.3
+   Dcoef = 5.4
+
+   VariableData {
+      variable_1 {
+         src_name = "src_var1"
+         dst_name = "dst_var1"
+         depth = 1
+         src_ghosts = 0,0
+         dst_ghosts = 3,3
+         coarsen_operator = "CONSERVATIVE_COARSEN"
+         refine_operator = "LINEAR_REFINE"
+      }
+   }
+}
+
+CartesianGridGeometry {
+   domain_boxes = [ (0,0) , (49,49) ]
+   x_lo         = 0.e0 , 0.e0
+   x_up         = 1.e0 , 1.e0
+   periodic_dimension = 1, 1
+}
+
+PatchHierarchy {
+   max_levels = 2
+   smallest_patch_size {
+      level_0 = 5, 5
+   }
+   ratio_to_coarser {
+      level_1 = 2, 2
+   }
+   allow_patches_smaller_than_ghostwidth = FALSE
+}
+
+TileClustering {
+}
+
+CascadePartitioner {
+}
+
+GriddingAlgorithm {
+   enforce_proper_nesting = TRUE
+   check_nonrefined_tags = "IGNORE"
+}
+
+// GRADIENT_DETECTOR (tags nothing) combined with REFINE_BOXES makes the
+// refine boxes go through tagging and clustering.  The whole domain is
+// refined so that all level 1 ghosts are filled from periodic level 1
+// neighbors, which reproduce the periodic test data exactly.
+StandardTaggingAndInitializer {
+   at_0 {
+      cycle = 0
+      tag_0 {
+         tagging_method = "GRADIENT_DETECTOR"
+      }
+      tag_1 {
+         tagging_method = "REFINE_BOXES"
+         level_0 {
+            block_0 {
+               boxes = [ (0,0) , (49,49) ]
+            }
+         }
+      }
+   }
+}
+
+PersistentOverlapConnectors {
+   DEV_check_created_connectors = FALSE
+   DEV_check_accessed_connectors = FALSE
+}

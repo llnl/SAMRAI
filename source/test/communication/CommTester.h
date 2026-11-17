@@ -188,6 +188,20 @@ public:
       const std::shared_ptr<hier::PatchHierarchy>& hierarchy,
       const int coarsest_level,
       const int finest_level);
+
+   /**
+    * Tags no cell.  Lets an input combine GRADIENT_DETECTOR with
+    * REFINE_BOXES, so that the refine boxes are tagged and clustered
+    * instead of being used directly as the new level boxes.
+    */
+   void
+   applyGradientDetector(
+      const std::shared_ptr<hier::PatchHierarchy>& hierarchy,
+      const int level_number,
+      const double error_data_time,
+      const int tag_index,
+      const bool initial_time,
+      const bool uses_richardson_extrapolation_too);
    /**
     * These routines pass off physicial boundary and pre/postprocess
     * coarsen/refine operations to patch data test object.  They are

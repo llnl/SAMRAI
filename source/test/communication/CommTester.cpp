@@ -12,8 +12,11 @@
 
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/mesh/BergerRigoutsos.h"
+#include "SAMRAI/mesh/CascadePartitioner.h"
 #include "SAMRAI/mesh/GriddingAlgorithm.h"
+#include "SAMRAI/mesh/TileClustering.h"
 #include "SAMRAI/mesh/TreeLoadBalancer.h"
+#include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/pdat/NodeData.h"
 #include "SAMRAI/xfer/CompositeBoundaryAlgorithm.h"
 
@@ -595,6 +598,30 @@ void CommTester::resetHierarchyConfiguration(
    NULL_USE(finest_level);
 }
 
+void CommTester::applyGradientDetector(
+   const std::shared_ptr<hier::PatchHierarchy>& hierarchy,
+   const int level_number,
+   const double error_data_time,
+   const int tag_index,
+   const bool initial_time,
+   const bool uses_richardson_extrapolation_too)
+{
+   NULL_USE(error_data_time);
+   NULL_USE(initial_time);
+   NULL_USE(uses_richardson_extrapolation_too);
+
+   std::shared_ptr<hier::PatchLevel> level(
+      hierarchy->getPatchLevel(level_number));
+   for (hier::PatchLevel::iterator ip(level->begin());
+        ip != level->end(); ++ip) {
+      std::shared_ptr<pdat::CellData<int> > tags(
+         SAMRAI_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
+            (*ip)->getPatchData(tag_index)));
+      TBOX_ASSERT(tags);
+      tags->fillAll(0);
+   }
+}
+
 /*
  *************************************************************************
  *
@@ -683,16 +710,34 @@ void CommTester::setupHierarchy(
          d_data_test_strategy->getGridGeometry(),
          main_input_db->getDatabase("PatchHierarchy")));
 
-   std::shared_ptr<mesh::BergerRigoutsos> box_generator(
-      new mesh::BergerRigoutsos(d_dim,
-         main_input_db->getDatabase("BergerRigoutsos")));
+   /*
+    * BergerRigoutsos and TreeLoadBalancer are used by default.
+    * TileClustering and/or CascadePartitioner are used instead
+    * when their input database is present.
+    */
+   std::shared_ptr<mesh::BoxGeneratorStrategy> box_generator;
+   if (main_input_db->isDatabase("TileClustering")) {
+      box_generator = std::make_shared<mesh::TileClustering>(d_dim,
+            main_input_db->getDatabase("TileClustering"));
+   } else {
+      box_generator = std::make_shared<mesh::BergerRigoutsos>(d_dim,
+            main_input_db->getDatabase("BergerRigoutsos"));
+   }
 
-   std::shared_ptr<mesh::TreeLoadBalancer> load_balancer(
-      new mesh::TreeLoadBalancer(
-         d_dim,
-         "TreeLoadBalancer",
-         main_input_db->getDatabase("TreeLoadBalancer")));
-   load_balancer->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
+   std::shared_ptr<mesh::LoadBalanceStrategy> load_balancer;
+   if (main_input_db->isDatabase("CascadePartitioner")) {
+      auto cascade = std::make_shared<mesh::CascadePartitioner>(d_dim,
+            "CascadePartitioner",
+            main_input_db->getDatabase("CascadePartitioner"));
+      cascade->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
+      load_balancer = cascade;
+   } else {
+      auto tree = std::make_shared<mesh::TreeLoadBalancer>(d_dim,
+            "TreeLoadBalancer",
+            main_input_db->getDatabase("TreeLoadBalancer"));
+      tree->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
+      load_balancer = tree;
+   }
 
    std::shared_ptr<mesh::GriddingAlgorithm> gridding_algorithm(
       new mesh::GriddingAlgorithm(
@@ -719,12 +764,16 @@ void CommTester::setupHierarchy(
    /*
     * Clear the PersistentOverlapConnectors so we can test whether
     * the communication schedules can work properly in the mode where
-    * there are no precomputed Connectors.
+    * there are no precomputed Connectors.  Keep them on request, to
+    * test schedules built from the Connectors left by gridding.
     */
-   for (int ln = 0; ln < d_patch_hierarchy->getNumberOfLevels(); ++ln) {
-      std::shared_ptr<hier::PatchLevel> level(
-         d_patch_hierarchy->getPatchLevel(ln));
-      level->getBoxLevel()->clearPersistentOverlapConnectors();
+   if (main_input_db->getDatabase("Main")->getBoolWithDefault(
+          "clear_persistent_connectors", true)) {
+      for (int ln = 0; ln < d_patch_hierarchy->getNumberOfLevels(); ++ln) {
+         std::shared_ptr<hier::PatchLevel> level(
+            d_patch_hierarchy->getPatchLevel(ln));
+         level->getBoxLevel()->clearPersistentOverlapConnectors();
+      }
    }
 
    if (0) {

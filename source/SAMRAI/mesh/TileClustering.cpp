@@ -857,12 +857,15 @@ TileClustering::detectSemilocalEdges(
          hier::CONNECTOR_IMPLICIT_CREATION_RULE, true);
    /*
     * We don't want to introduce periodic relationships yet, so remove
-    * them from the tag<==>tag leg of the bridge.  tag_to_tag doesn't
-    * point to itself as its own transpose, but it could and should,
-    * and used to.
+    * them from the tag<==>tag leg of the bridge.
+    *
+    * tag_to_tag is a copy of a Connector cached by tag_box_level, and the
+    * copy's transpose is that cached Connector.  Make the copy its own
+    * transpose so that removing the periodic relationships does not alter
+    * the cached Connector, which later users expect to be complete.
     */
+   tag_to_tag.setTranspose(&tag_to_tag, false);
    tag_to_tag.removePeriodicRelationships();
-   tag_to_tag.getTranspose().removePeriodicRelationships();
 
    /*
     * Bridge tag<==>tag<==>new to get the complete tag<==>new.
